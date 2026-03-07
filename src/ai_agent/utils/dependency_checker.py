@@ -26,21 +26,17 @@ class DependencyChecker:
         # Core dependencies that must be available
         self.core_dependencies = {
             "PIL": "Pillow>=10.0.0",
-            "pyautogui": "pyautogui>=0.9.54", 
             "requests": "requests>=2.31.0",
-            "cv2": "opencv-python>=4.8.0",
             "numpy": "numpy>=1.24.0",
-            "pynput": "pynput>=1.7.6",
-            "openai": "openai>=1.0.0",
-            "anthropic": "anthropic>=0.7.0",
-            "transformers": "transformers>=4.35.0",
-            "torch": "torch>=2.1.0",
-            "cryptography": "cryptography>=41.0.0",
-            "pydantic": "pydantic>=2.0.0",
             "structlog": "structlog>=23.0.0",
             "rich": "rich>=13.0.0",
             "yaml": "PyYAML>=6.0.0",  # yaml module imports as PyYAML package
-            "ollama": "ollama>=0.1.0",  # Add missing ollama dependency
+            "ollama": "ollama>=0.1.0",  # Ollama Python library
+        }
+        
+        # Conditional dependencies (only checked on specific platforms)
+        self.conditional_dependencies = {
+            "pyautogui": "pyautogui>=0.9.54",  # Only used as fallback in platform_detector.py
         }
         
         # Platform-specific dependencies
@@ -260,6 +256,15 @@ class DependencyChecker:
                 results[module] = (True, f"{package} ({version}) ✓")
             else:
                 results[module] = (False, f"{package} ✗")
+        
+        # Check conditional dependencies
+        print("🔍 Checking conditional dependencies...")
+        for module, package in self.conditional_dependencies.items():
+            if self.check_import(module):
+                version = self.get_package_version(module)
+                results[module] = (True, f"{package} ({version}) ✓ [conditional]")
+            else:
+                results[module] = (False, f"{package} ✗ [conditional]")
         
         return results
 
@@ -523,6 +528,33 @@ class DependencyChecker:
         
         print(f"\n🔧 Found {len(missing_deps)} missing dependencies. Attempting auto-install...")
         
+        # Separate core and conditional dependencies
+        core_missing = []
+        conditional_missing = []
+        
+        for dep in missing_deps:
+            if dep in self.core_dependencies:
+                core_missing.append(dep)
+            elif dep in self.conditional_dependencies:
+                conditional_missing.append(dep)
+        
+        # Install core dependencies first
+        if core_missing:
+            print(f"\n📦 Installing {len(core_missing)} core dependencies...")
+            if not self._install_dependencies(core_missing, self.core_dependencies):
+                return False
+        
+        # Install conditional dependencies (optional)
+        if conditional_missing:
+            print(f"\n📦 Installing {len(conditional_missing)} conditional dependencies (optional)...")
+            print("💡 These are optional and only used as fallbacks")
+            # Conditional dependencies are optional, so don't fail if they don't install
+            self._install_dependencies(conditional_missing, self.conditional_dependencies, optional=True)
+        
+        return True
+    
+    def _install_dependencies(self, missing_deps: List[str], dep_dict: Dict[str, str], optional: bool = False) -> bool:
+        """Helper method to install a list of dependencies"""
         # Check network connectivity first
         net_ok, net_msg = self.check_network_connectivity()
         if not net_ok:
@@ -577,14 +609,8 @@ class DependencyChecker:
         # Fall back to individual package installation
         failed_packages = []
         for dep in missing_deps:
-            if dep in self.core_dependencies:
-                package = self.core_dependencies[dep]
-            elif sys.platform in self.platform_dependencies:
-                platform_deps = self.platform_dependencies[sys.platform]
-                if dep in platform_deps:
-                    package = platform_deps[dep]
-                else:
-                    package = dep
+            if dep in dep_dict:
+                package = dep_dict[dep]
             else:
                 package = dep
             
@@ -593,7 +619,10 @@ class DependencyChecker:
                 print(f"✅ {message}")
             else:
                 print(f"❌ {message}")
-                failed_packages.append(dep)
+                if not optional:
+                    failed_packages.append(dep)
+                else:
+                    print(f"⚠️  Optional dependency {dep} failed to install, continuing...")
         
         # Install project in editable mode
         success, message = self.install_project(use_venv=use_venv)
@@ -606,8 +635,8 @@ class DependencyChecker:
             print(f"\n❌ Failed to install: {', '.join(failed_packages)}")
             print("💡 Try installing these manually:")
             for pkg in failed_packages:
-                if pkg in self.core_dependencies:
-                    print(f"   pip install {self.core_dependencies[pkg]}")
+                if pkg in dep_dict:
+                    print(f"   pip install {dep_dict[pkg]}")
                 else:
                     print(f"   pip install {pkg}")
             return False
@@ -629,6 +658,10 @@ class DependencyChecker:
         core_results = self.check_core_dependencies()
         missing_core = [mod for mod, (ok, _) in core_results.items() if not ok]
         
+        # Separate core and conditional missing dependencies
+        missing_conditional = [mod for mod in missing_core if mod in self.conditional_dependencies]
+        missing_core_only = [mod for mod in missing_core if mod not in self.conditional_dependencies]
+        
         # Check platform dependencies  
         platform_results = self.check_platform_dependencies()
         missing_platform = [mod for mod, (ok, _) in platform_results.items() if not ok]
@@ -638,21 +671,31 @@ class DependencyChecker:
         missing_system = [pkg for pkg, (ok, _) in system_results.items() if not ok]
         
         # Display results
-        all_missing = missing_core + missing_platform
+        all_missing = missing_core_only + missing_platform
         
         if not all_missing and not missing_system:
-            print("\n✅ All dependencies are satisfied!")
+            print("\n✅ All core dependencies are satisfied!")
+            if missing_conditional:
+                print(f"\n💡 {len(missing_conditional)} conditional dependencies missing (optional):")
+                for mod in missing_conditional:
+                    print(f"   - {core_results[mod][1]}")
             return True
         
         print(f"\n📊 Dependency Summary:")
-        print(f"   Core dependencies missing: {len(missing_core)}")
+        print(f"   Core dependencies missing: {len(missing_core_only)}")
+        print(f"   Conditional dependencies missing: {len(missing_conditional)} (optional)")
         print(f"   Platform dependencies missing: {len(missing_platform)}")  
         print(f"   System dependencies missing: {len(missing_system)}")
         
         # Show missing dependencies
-        if missing_core:
+        if missing_core_only:
             print(f"\n❌ Missing core dependencies:")
-            for mod in missing_core:
+            for mod in missing_core_only:
+                print(f"   - {core_results[mod][1]}")
+        
+        if missing_conditional:
+            print(f"\n💡 Missing conditional dependencies (optional):")
+            for mod in missing_conditional:
                 print(f"   - {core_results[mod][1]}")
         
         if missing_platform:

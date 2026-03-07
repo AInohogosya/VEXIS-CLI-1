@@ -29,22 +29,16 @@ keywords = ["ai", "automation", "cli", "terminal", "command-line"]
 requires-python = ">=3.8"
 dependencies = [
     "Pillow>=10.0.0",
-    "pyautogui>=0.9.54",
     "requests>=2.31.0",
-    "opencv-python>=4.8.0",
     "numpy>=1.24.0",
-    "pynput>=1.7.6",
-    "openai>=1.0.0",
-    "anthropic>=0.7.0",
-    "transformers>=4.35.0",
-    "torch>=2.1.0",
+    "structlog>=23.0.0",
+    "rich>=13.0.0",
+    "PyYAML>=6.0.0",
+    "ollama>=0.1.0",
+    "pyautogui>=0.9.54; sys_platform=='darwin'",
     "pyobjc-framework-Cocoa>=9.0; sys_platform=='darwin'",
     "pywin32>=306; sys_platform=='win32'",
     "python-xlib>=0.33; sys_platform=='linux'",
-    "cryptography>=41.0.0",
-    "pydantic>=2.0.0",
-    "structlog>=23.0.0",
-    "rich>=13.0.0",
 ]
 
 
