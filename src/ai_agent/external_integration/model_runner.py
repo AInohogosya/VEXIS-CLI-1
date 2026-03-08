@@ -69,12 +69,15 @@ Example:
 - "open safari" -> 1. Open safari browser
 - "create python project" -> 1. Create project folder, 2. Navigate to folder, 3. Initialize git
 
+CRITICAL: Output ONLY the numbered list. No explanations, no intro text, no markdown formatting.
+
 Output format:
 1. [First CLI step]
 2. [Second CLI step]
+3. [Third CLI step]
 ...
 
-Only the numbered list, no extra text.""",
+Each step should be a clear, actionable CLI-oriented task description.""",
 
             TaskType.COMMAND_PARSING.value: """Convert this task into a single CLI command.
 
