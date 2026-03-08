@@ -811,9 +811,8 @@ def select_model_provider():
     from ai_agent.utils.curses_menu import get_curses_menu
     
     settings_manager = get_settings_manager()
-    current_provider = settings_manager.get_preferred_provider()
     
-    # Use curses-based menu with arrow keys
+    # Use curses-based menu with arrow keys - always show selection
     menu = get_curses_menu(
         "🔧 Select AI Provider",
         "Choose how you want to run AI models:"
@@ -836,14 +835,9 @@ def select_model_provider():
     selected_provider = menu.show()
     
     if selected_provider is None:
-        # User cancelled - use current settings
-        if current_provider == "google":
-            model = settings_manager.get_google_model()
-            show_config_summary(current_provider, model)
-        else:
-            ollama_model = settings_manager.get_ollama_model()
-            show_config_summary(current_provider, ollama_model)
-        return current_provider
+        # User cancelled - exit to force selection
+        print("Provider selection cancelled. Please select a provider to continue.")
+        sys.exit(1)
     
     
     # Handle provider selection
@@ -941,8 +935,14 @@ def main():
     # Check for debug mode
     debug_mode = "--debug" in sys.argv
     
-    # Model selection - only prompt if not using --no-prompt flag
+    # Model selection - always prompt unless --no-prompt is used
     if "--no-prompt" not in sys.argv:
+        # Clear previous model selection to force reselection
+        from ai_agent.utils.settings_manager import get_settings_manager
+        settings_manager = get_settings_manager()
+        settings_manager.clear_model_selection()
+        
+        print(f"\n🔧 Model Selection")
         selected_provider = select_model_provider()
         print(f"\nUsing provider: {selected_provider}")
     else:

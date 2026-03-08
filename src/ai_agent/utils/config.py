@@ -18,7 +18,10 @@ def _get_ollama_model_from_settings() -> str:
         from .settings_manager import get_settings_manager
         settings = get_settings_manager()
         model = settings.get_ollama_model()
-        return model if model else "llama3.2:latest"
+        # Only use saved model if it's not the default (indicating user selection)
+        if model and model != "llama3.2:latest":
+            return model
+        return "llama3.2:latest"  # Always start with default to force selection
     except Exception:
         return "llama3.2:latest"
 
@@ -257,15 +260,19 @@ class ConfigManager:
                     with open(settings_path, 'r') as f:
                         settings_data = json.load(f)
                         ollama_model = settings_data.get("ollama_model")
-                        if ollama_model:
+                        # Only override if it's a user-selected model (not default)
+                        if ollama_model and ollama_model != "llama3.2:latest":
                             api_config_dict["local_model"] = ollama_model
                             verification_config_dict["verification_model"] = ollama_model
                             # Debug logging
                             import logging
-                            logging.getLogger("config").info(f"Overriding config with settings model: {ollama_model}")
+                            logging.getLogger("config").info(f"Using user-selected model: {ollama_model}")
+                        else:
+                            # Keep default to force selection
+                            logging.getLogger("config").info("Using default model to force selection")
             except Exception as e:
                 import logging
-                logging.getLogger("config").warning(f"Could not override from settings file: {e}")
+                logging.getLogger("config").warning(f"Could not read settings file: {e}")
                 pass  # Fall back to config file values or defaults
             
             return Config(

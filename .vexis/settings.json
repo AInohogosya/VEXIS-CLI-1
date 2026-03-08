@@ -3,5 +3,5 @@
   "preferred_provider": "ollama",
   "save_api_key": true,
   "google_model": "gemini-3-flash-preview",
-  "ollama_model": "deepseek-v3.1:671b-cloud"
+  "ollama_model": "llama3.2:latest"
 }
