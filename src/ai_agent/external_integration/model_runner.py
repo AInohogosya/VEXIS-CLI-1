@@ -97,17 +97,31 @@ Available commands: Any CLI command, END (stop), REGENERATE_STEP (retry)
 
 CRITICAL: Do NOT use markdown formatting, code blocks, or any special characters. Output plain text only.
 
+CRITICAL COMMAND OUTPUT REQUIREMENTS:
+- Output the CLI command WITHOUT any enclosing characters
+- NO quotes (single or double) around the command
+- NO brackets, parentheses, or other special characters
+- NO markdown formatting like ```bash or ```
+- The command should be plain, executable text exactly as it would appear in a terminal
+- This is EXTREMELY important - the command must be directly executable without any modification
+
 Output format (4 lines):
 Reasoning: [Why this command, considering your history]
 Target: [What this command targets]
-[The CLI command - PLAIN TEXT, no markdown or code blocks]
+[The CLI command - PLAIN TEXT, NO enclosing characters, NO quotes, NO brackets, NO markdown]
 Terminal Log: [History will show after execution]
 
-Example:
-Reasoning: User wants to open safari, no previous actions needed
-Target: Safari browser
-open -a Safari
-Terminal Log: [Will display terminal after execution]
+Examples of CORRECT command output:
+- open -a Safari
+- ls -la
+- cd /Users/username
+- python script.py
+
+Examples of INCORRECT command output:
+- "open -a Safari"  (wrong - has quotes)
+- ```open -a Safari```  (wrong - has markdown)
+- [open -a Safari]  (wrong - has brackets)
+- 'open -a Safari'  (wrong - has single quotes)
 
 END""",
 
