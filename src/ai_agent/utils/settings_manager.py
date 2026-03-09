@@ -121,18 +121,6 @@ class SettingsManager:
     def get_ollama_model(self) -> str:
         """Get Ollama model"""
         return self._settings.ollama_model
-    
-    def clear_model_selection(self):
-        """Clear model selection to force reselection"""
-        self._settings.ollama_model = "llama3.2:latest"  # Reset to default
-        self._settings.google_model = "gemini-3-flash-preview"  # Reset to default
-        self._save_settings()
-        self.logger.info("Model selection cleared - reset to defaults")
-    
-    def force_model_reslection(self):
-        """Force model reselection on next run"""
-        self.clear_model_selection()
-        self.logger.info("Forcing model reselection on next run")
 
 
 # Global settings manager instance

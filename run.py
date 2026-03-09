@@ -515,11 +515,10 @@ def prompt_for_google_api_key():
 
 def select_google_model():
     """Prompt user to select Google model using curses arrow keys"""
-    from ai_agent.utils.settings_manager import get_settings_manager
+    # Settings manager import removed - model selection no longer saved
     from ai_agent.utils.curses_menu import get_curses_menu
     
-    settings_manager = get_settings_manager()
-    current_model = settings_manager.get_google_model()
+    current_model = "gemini-3-flash-preview"  # Default model
     
     # Use curses-based menu with arrow keys
     menu = get_curses_menu(
@@ -546,15 +545,12 @@ def select_google_model():
     if selected_model is None:
         return current_model
     
-    settings_manager.set_google_model(selected_model)
+    # Save selection removed - just return selected model
     return selected_model
 
 def show_config_summary(provider: str, model: str = None):
     """Display a clean configuration summary"""
     from ai_agent.utils.interactive_menu import Colors
-    from ai_agent.utils.settings_manager import get_settings_manager
-    
-    settings_manager = get_settings_manager()
     
     print(f"\n{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.BRIGHT_GREEN}✓ Configuration Complete{Colors.RESET}")
@@ -562,41 +558,35 @@ def show_config_summary(provider: str, model: str = None):
     
     if provider == "ollama":
         print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Ollama (Local Models){Colors.RESET}")
-        ollama_model = settings_manager.get_ollama_model()
+        # Use provided model parameter instead of settings
+        ollama_model = model if model else "llama3.2:latest"
         print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{ollama_model}{Colors.RESET}")
     else:
         print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Google Official API{Colors.RESET}")
-        if model:
-            model_name = "Gemini 3 Flash" if model == "gemini-3-flash-preview" else "Gemini 3.1 Pro"
-            print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{model_name}{Colors.RESET}")
+        # Use provided model parameter instead of settings
+        google_model = model if model else "gemini-3-flash-preview"
+        print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{google_model}{Colors.RESET}")
     
     
     print(f"{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}\n")
 
 def configure_google_provider():
     """Configure Google provider with API key and model selection"""
-    from ai_agent.utils.settings_manager import get_settings_manager
+    # Settings manager import removed - only API key handling needed
     from ai_agent.utils.interactive_menu import Colors
     
-    settings_manager = get_settings_manager()
-    
-    # Check if API key already exists
-    if not settings_manager.has_google_api_key():
-        # Prompt for API key
-        result = prompt_for_google_api_key()
-        if result is None:
-            return None, None
-        
-        api_key, should_save = result
-        settings_manager.set_google_api_key(api_key, should_save)
-    
+    # Simple API key prompt - no saving
+    api_key = input(f"\n{Colors.CYAN}Enter Google API key: {Colors.RESET}").strip()
+    if not api_key:
+        print(f"{Colors.RED}API key is required for Google provider{Colors.RESET}")
+        return None, None
     
     # Select model
     model = select_google_model()
     if model is None:
-        model = settings_manager.get_google_model()
+        model = "gemini-3-flash-preview"  # Default
     
-    settings_manager.set_preferred_provider("google")
+    # Return provider and model (no saving)
     return "google", model
 
 def ensure_ollama_model_available(model_name: str) -> bool:
@@ -747,12 +737,10 @@ def ensure_ollama_model_available(model_name: str) -> bool:
 
 def configure_ollama_provider():
     """Configure Ollama provider with model selection"""
-    from ai_agent.utils.settings_manager import get_settings_manager
+    # Settings manager import removed - model selection no longer saved
     from ai_agent.utils.ollama_model_selector import select_ollama_model
     from ai_agent.utils.interactive_menu import Colors, warning_message, info_message
     from ai_agent.utils.ollama_error_handler import handle_ollama_error
-    
-    settings_manager = get_settings_manager()
     
     # Check Ollama with version-aware fallback
     try:
@@ -788,10 +776,10 @@ def configure_ollama_provider():
         return None
     
     if model is None:
-        # User cancelled or selection failed - show current model and continue
-        current_model = settings_manager.get_ollama_model()
-        warning_message(f"Using current model: {current_model}")
-        model = current_model
+        # User cancelled or selection failed - use default model
+        default_model = "llama3.2:latest"
+        warning_message(f"Using default model: {default_model}")
+        model = default_model
     else:
         # Successfully selected new model
         from ai_agent.utils.interactive_menu import success_message
@@ -802,15 +790,13 @@ def configure_ollama_provider():
         info_message(f"Failed to pull Ollama model: {model}")
         return None
     
-    settings_manager.set_preferred_provider("ollama")
+    # Return provider (no saving)
     return "ollama"
 
 def select_model_provider():
     """Main configuration screen for model provider selection using curses arrow keys"""
-    from ai_agent.utils.settings_manager import get_settings_manager
+    # Settings manager import removed - provider selection no longer saved
     from ai_agent.utils.curses_menu import get_curses_menu
-    
-    settings_manager = get_settings_manager()
     
     # Use curses-based menu with arrow keys - always show selection
     menu = get_curses_menu(
@@ -846,8 +832,8 @@ def select_model_provider():
         if result is None:
             # Failed - retry configuration
             return select_model_provider()
-        ollama_model = settings_manager.get_ollama_model()
-        show_config_summary("ollama", ollama_model)
+        # Use default model since no settings are saved
+        show_config_summary("ollama", "llama3.2:latest")
         return "ollama"
         
     elif selected_provider == "google":
@@ -860,6 +846,13 @@ def select_model_provider():
 
 def main():
     """Main entry point"""
+    # Check for and delete .vexis folder immediately
+    vexis_path = Path(".vexis")
+    if vexis_path.exists():
+        print(f"🗑️  Removing existing .vexis folder...")
+        shutil.rmtree(vexis_path)
+        print("✓ .vexis folder deleted")
+    
     # Check for help flag first
     if "--help" in sys.argv or "-h" in sys.argv:
         show_help()
@@ -937,19 +930,13 @@ def main():
     
     # Model selection - always prompt unless --no-prompt is used
     if "--no-prompt" not in sys.argv:
-        # Clear previous model selection to force reselection
-        from ai_agent.utils.settings_manager import get_settings_manager
-        settings_manager = get_settings_manager()
-        settings_manager.clear_model_selection()
-        
         print(f"\n🔧 Model Selection")
         selected_provider = select_model_provider()
         print(f"\nUsing provider: {selected_provider}")
     else:
-        from ai_agent.utils.settings_manager import get_settings_manager
-        settings_manager = get_settings_manager()
-        selected_provider = settings_manager.get_preferred_provider()
-        print(f"\nUsing saved provider preference: {selected_provider}")
+        # When --no-prompt is used, default to ollama
+        selected_provider = "ollama"
+        print(f"\nUsing default provider: {selected_provider}")
     
     print(f"\nAI Agent executing: {instruction}")
     
@@ -957,7 +944,7 @@ def main():
         from ai_agent.user_interface.two_phase_app import TwoPhaseAIAgent
         
         # Update config with selected provider
-        config_path = current_dir / "config.yaml"
+        config_path = current_dir / "config.json"
         agent = TwoPhaseAIAgent(config_path=str(config_path) if config_path.exists() else None)
         
         # Update the vision client configuration with the selected provider
@@ -965,14 +952,12 @@ def main():
             model_runner = agent.engine.model_runner
             if hasattr(model_runner, 'vision_client'):
                 # Update the vision client config
-                from ai_agent.utils.settings_manager import get_settings_manager
-                settings_manager = get_settings_manager()
+                # Settings manager removed - use defaults
                 
                 # Reload config with updated provider settings
                 updated_config = model_runner.config.copy()
                 updated_config['preferred_provider'] = selected_provider
-                updated_config['google_api_key'] = settings_manager.get_google_api_key()
-                updated_config['google_model'] = settings_manager.get_google_model()
+                # API key and model will be handled by the agent itself
                 
                 # Reinitialize vision client with updated config
                 model_runner.vision_client.config = updated_config

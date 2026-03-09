@@ -4,7 +4,6 @@ Zero-defect policy: comprehensive configuration with validation
 """
 
 import os
-import yaml
 import json
 from typing import Dict, Any, Optional, Union
 from pathlib import Path
@@ -13,17 +12,9 @@ from .exceptions import ConfigurationError, ValidationError
 
 
 def _get_ollama_model_from_settings() -> str:
-    """Get the Ollama model from settings manager, with fallback to default"""
-    try:
-        from .settings_manager import get_settings_manager
-        settings = get_settings_manager()
-        model = settings.get_ollama_model()
-        # Only use saved model if it's not the default (indicating user selection)
-        if model and model != "llama3.2:latest":
-            return model
-        return "llama3.2:latest"  # Always start with default to force selection
-    except Exception:
-        return "llama3.2:latest"
+    """Get the Ollama model - always returns default to force selection"""
+    # Settings file reading removed - always return default
+    return "llama3.2:latest"
 
 
 @dataclass
@@ -167,17 +158,9 @@ class ConfigManager:
         # Load from file if exists
         if self.config_path and self.config_path.exists():
             try:
-                if self.config_path.suffix.lower() in ['.yaml', '.yml']:
-                    with open(self.config_path, 'r') as f:
-                        file_config = yaml.safe_load(f)
-                elif self.config_path.suffix.lower() == '.json':
-                    with open(self.config_path, 'r') as f:
-                        file_config = json.load(f)
-                else:
-                    raise ConfigurationError(
-                        f"Unsupported config file format: {self.config_path.suffix}",
-                        config_file=str(self.config_path)
-                    )
+                # Only support JSON files now
+                with open(self.config_path, 'r') as f:
+                    file_config = json.load(f)
                 
                 # Merge with default config
                 self._merge_config(self._raw_config, file_config)
@@ -250,30 +233,13 @@ class ConfigManager:
             api_config_dict = self._raw_config.get("api", {})
             verification_config_dict = self._raw_config.get("verification", {})
             
-            # Override model values from settings manager to ensure user selection takes precedence
-            ollama_model = None
-            try:
-                # Read settings file directly to avoid circular dependency with SettingsManager
-                import json
-                settings_path = Path(__file__).parent.parent.parent.parent / ".vexis" / "settings.json"
-                if settings_path.exists():
-                    with open(settings_path, 'r') as f:
-                        settings_data = json.load(f)
-                        ollama_model = settings_data.get("ollama_model")
-                        # Only override if it's a user-selected model (not default)
-                        if ollama_model and ollama_model != "llama3.2:latest":
-                            api_config_dict["local_model"] = ollama_model
-                            verification_config_dict["verification_model"] = ollama_model
-                            # Debug logging
-                            import logging
-                            logging.getLogger("config").info(f"Using user-selected model: {ollama_model}")
-                        else:
-                            # Keep default to force selection
-                            logging.getLogger("config").info("Using default model to force selection")
-            except Exception as e:
-                import logging
-                logging.getLogger("config").warning(f"Could not read settings file: {e}")
-                pass  # Fall back to config file values or defaults
+            # Settings file reading removed - use defaults only
+            api_config_dict = self._raw_config.get("api", {})
+            verification_config_dict = self._raw_config.get("verification", {})
+            
+            # Always use default models to force selection
+            import logging
+            logging.getLogger("config").info("Using default models - settings file reading removed")
             
             return Config(
                 logging=LoggingConfig(**self._raw_config.get("logging", {})),
@@ -347,17 +313,9 @@ class ConfigManager:
         save_path.parent.mkdir(parents=True, exist_ok=True)
         
         try:
-            if save_path.suffix.lower() in ['.yaml', '.yml']:
-                with open(save_path, 'w') as f:
-                    yaml.dump(config_dict, f, default_flow_style=False, indent=2)
-            elif save_path.suffix.lower() == '.json':
-                with open(save_path, 'w') as f:
-                    json.dump(config_dict, f, indent=2)
-            else:
-                raise ConfigurationError(
-                    f"Unsupported config file format: {save_path.suffix}",
-                    config_file=str(save_path)
-                )
+            # Only support JSON files now
+            with open(save_path, 'w') as f:
+                json.dump(config_dict, f, indent=2)
         except Exception as e:
             raise ConfigurationError(
                 f"Failed to save config file: {e}",

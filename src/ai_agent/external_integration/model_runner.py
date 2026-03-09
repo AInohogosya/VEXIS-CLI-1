@@ -151,15 +151,37 @@ class ModelRunner:
         # Initialize components
         self.vision_client = VisionAPIClient(self.config)
         self.prompt_template = PromptTemplate()
+        
+        # Force model validation - no defaults allowed
+        self._validate_model_configuration()
 
         self.logger.info(
-            "Model runner initialized",
-            preferred_provider=self.config.get("preferred_provider", "ollama"),
-            default_model=self.DEFAULT_OLLAMA_MODEL,
+            "Model runner initialized - session specific",
+            preferred_provider=self.config.get("preferred_provider", "unknown"),
         )
 
+    def _validate_model_configuration(self):
+        """Validate that a model is properly configured for this session"""
+        preferred_provider = self.config.get("preferred_provider")
+        
+        if not preferred_provider:
+            raise ValueError("No provider selected - user must select a provider first")
+        
+        if preferred_provider == "google":
+            google_model = self.config.get("google_model")
+            google_api_key = self.config.get("google_api_key")
+            if not google_model:
+                raise ValueError("No Google model selected - user must select a model first")
+            if not google_api_key:
+                raise ValueError("No Google API key provided - user must provide API key first")
+        elif preferred_provider == "ollama":
+            ollama_model = self.config.get("local_model")
+            if not ollama_model:
+                raise ValueError("No Ollama model selected - user must select a model first")
+        else:
+            raise ValueError(f"Invalid provider: {preferred_provider}")
+
     def run_model(self, request: ModelRequest) -> ModelResponse:
-        """Run AI model for CLI Architecture"""
         start_time = time.time()
 
         try:
@@ -169,15 +191,22 @@ class ModelRunner:
             # Format prompt
             prompt = self._format_prompt(request)
 
-            # Determine provider and model
-            preferred_provider = self.config.get("preferred_provider", "ollama")
-
-            if preferred_provider == "google" and self.config.get("google_api_key"):
+            # Determine provider and model - use only session-selected values
+            preferred_provider = self.config.get("preferred_provider")
+            
+            if preferred_provider == "google":
                 provider_enum = APIProvider.GOOGLE
-                model_name = self.config.get("google_model", self.DEFAULT_GOOGLE_MODEL)
-            else:
+                model_name = self.config.get("google_model")
+                api_key = self.config.get("google_api_key")
+                if not model_name or not api_key:
+                    raise ValueError("Google model and API key must be selected for this session")
+            elif preferred_provider == "ollama":
                 provider_enum = APIProvider.OLLAMA
-                model_name = self.config.get("local_model", self.DEFAULT_OLLAMA_MODEL)
+                model_name = self.config.get("local_model")
+                if not model_name:
+                    raise ValueError("Ollama model must be selected for this session")
+            else:
+                raise ValueError(f"Invalid provider: {preferred_provider}")
 
             # Create API request
             api_request = APIRequest(
