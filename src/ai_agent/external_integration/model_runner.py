@@ -152,8 +152,7 @@ class ModelRunner:
         self.vision_client = VisionAPIClient(self.config)
         self.prompt_template = PromptTemplate()
         
-        # Force model validation - no defaults allowed
-        self._validate_model_configuration()
+        # Don't validate here - will be validated when config is updated
 
         self.logger.info(
             "Model runner initialized - session specific",

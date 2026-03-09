@@ -740,8 +740,7 @@ def configure_ollama_provider():
     from ai_agent.utils.ollama_model_selector import select_ollama_model
     from ai_agent.utils.interactive_menu import Colors, warning_message, info_message
     from ai_agent.utils.ollama_error_handler import handle_ollama_error
-    from ai_agent.utils.settings_manager import get_settings_manager
-    
+        
     # Check Ollama with version-aware fallback
     try:
         login_ok, status = check_ollama_login_with_fallback()
@@ -776,19 +775,8 @@ def configure_ollama_provider():
         return None
     
     if model is None:
-        # User cancelled or selection failed - use default model
-        default_model = "llama3.2:latest"
-        warning_message(f"Using default model: {default_model}")
-        model = default_model
-    else:
-        # Successfully selected new model - save to settings
-        try:
-            settings_manager = get_settings_manager()
-            settings_manager.set_ollama_model(model)
-            from ai_agent.utils.interactive_menu import success_message
-            success_message(f"Selected and saved Ollama model: {model}")
-        except Exception as e:
-            warning_message(f"Model selected but failed to save: {e}")
+        # User cancelled selection - return None to force restart
+        return None
     
     # Ensure the model is pulled locally
     if not ensure_ollama_model_available(model):
@@ -841,7 +829,7 @@ def select_model_provider():
         # result is now a tuple: (provider, model)
         provider, model = result
         show_config_summary(provider, model)
-        return provider
+        return provider, model
         
     elif selected_provider == "google":
         provider, model = configure_google_provider()
@@ -849,7 +837,7 @@ def select_model_provider():
             # User cancelled API key entry - retry
             return select_model_provider()
         show_config_summary(provider, model)
-        return "google"
+        return provider, model
 
 def main():
     """Main entry point"""
@@ -931,11 +919,17 @@ def main():
     # Model selection - always prompt unless --no-prompt is used
     if "--no-prompt" not in sys.argv:
         print(f"\n🔧 Model Selection")
-        selected_provider = select_model_provider()
+        provider_result = select_model_provider()
+        if isinstance(provider_result, tuple):
+            selected_provider, selected_model = provider_result
+        else:
+            selected_provider = provider_result
+            selected_model = None
         print(f"\nUsing provider: {selected_provider}")
     else:
         # When --no-prompt is used, default to ollama
         selected_provider = "ollama"
+        selected_model = None
         print(f"\nUsing default provider: {selected_provider}")
     
     print(f"\nAI Agent executing: {instruction}")
@@ -957,10 +951,19 @@ def main():
                 # Reload config with updated provider settings
                 updated_config = model_runner.config.copy()
                 updated_config['preferred_provider'] = selected_provider
-                # API key and model will be handled by the agent itself
+                
+                # Add model configuration based on provider
+                if selected_provider == "ollama" and selected_model:
+                    updated_config['local_model'] = selected_model
+                elif selected_provider == "google" and selected_model:
+                    updated_config['google_model'] = selected_model
                 
                 # Reinitialize vision client with updated config
                 model_runner.vision_client.config = updated_config
+                
+                # Validate the updated configuration
+                model_runner.config = updated_config
+                model_runner._validate_model_configuration()
         
         # Run the instruction
         options = {"debug": debug_mode}
