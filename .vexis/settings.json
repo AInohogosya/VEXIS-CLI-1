@@ -1,0 +1,7 @@
+{
+  "google_api_key": null,
+  "preferred_provider": "ollama",
+  "save_api_key": true,
+  "google_model": "gemini-3-flash-preview",
+  "ollama_model": "qwen3:4b"
+}

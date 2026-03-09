@@ -737,10 +737,10 @@ def ensure_ollama_model_available(model_name: str) -> bool:
 
 def configure_ollama_provider():
     """Configure Ollama provider with model selection"""
-    # Settings manager import removed - model selection no longer saved
     from ai_agent.utils.ollama_model_selector import select_ollama_model
     from ai_agent.utils.interactive_menu import Colors, warning_message, info_message
     from ai_agent.utils.ollama_error_handler import handle_ollama_error
+    from ai_agent.utils.settings_manager import get_settings_manager
     
     # Check Ollama with version-aware fallback
     try:
@@ -781,17 +781,22 @@ def configure_ollama_provider():
         warning_message(f"Using default model: {default_model}")
         model = default_model
     else:
-        # Successfully selected new model
-        from ai_agent.utils.interactive_menu import success_message
-        success_message(f"Selected Ollama model: {model}")
+        # Successfully selected new model - save to settings
+        try:
+            settings_manager = get_settings_manager()
+            settings_manager.set_ollama_model(model)
+            from ai_agent.utils.interactive_menu import success_message
+            success_message(f"Selected and saved Ollama model: {model}")
+        except Exception as e:
+            warning_message(f"Model selected but failed to save: {e}")
     
     # Ensure the model is pulled locally
     if not ensure_ollama_model_available(model):
         info_message(f"Failed to pull Ollama model: {model}")
         return None
     
-    # Return provider (no saving)
-    return "ollama"
+    # Return provider and save the selected model
+    return "ollama", model
 
 def select_model_provider():
     """Main configuration screen for model provider selection using curses arrow keys"""
@@ -832,9 +837,11 @@ def select_model_provider():
         if result is None:
             # Failed - retry configuration
             return select_model_provider()
-        # Use default model since no settings are saved
-        show_config_summary("ollama", "llama3.2:latest")
-        return "ollama"
+        
+        # result is now a tuple: (provider, model)
+        provider, model = result
+        show_config_summary(provider, model)
+        return provider
         
     elif selected_provider == "google":
         provider, model = configure_google_provider()
@@ -846,13 +853,6 @@ def select_model_provider():
 
 def main():
     """Main entry point"""
-    # Check for and delete .vexis folder immediately
-    vexis_path = Path(".vexis")
-    if vexis_path.exists():
-        print(f"🗑️  Removing existing .vexis folder...")
-        shutil.rmtree(vexis_path)
-        print("✓ .vexis folder deleted")
-    
     # Check for help flag first
     if "--help" in sys.argv or "-h" in sys.argv:
         show_help()
