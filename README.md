@@ -1,8 +1,12 @@
+<div align="center">
+
 # VEXIS-CLI-1
+
+</div>
 
 <div align="center">
 
-![VEXIS CLI Logo](https://img.shields.io/badge/VEXIS-CLI%201.0-blue?style=for-the-badge)
+![VEXIS CLI Logo](https://img.shields.io/badge/VEXIS-CLI%201.0.0-blue?style=for-the-badge)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue?style=for-the-badge&logo=python)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=for-the-badge)
@@ -82,23 +86,27 @@ vexis-cli "List all Python files in the current directory"
 
 ## Supported AI Models
 
-VEXIS-CLI-1 supports **80+ models** from **12 major providers**:
+VEXIS-CLI-1 supports **150+ models** from **20 major providers** through Ollama:
 
-### Major Providers
-- **OpenAI**: GPT-4, GPT-3.5 series
-- **Meta**: Llama 3.1/3.2/3.3 series
-- **Google**: Gemma 2/3, Gemini models
-- **Mistral**: Mistral Large/Small, Ministral
-- **Anthropic**: Claude 3.5/3.7 series
-- **DeepSeek**: DeepSeek R1, DeepSeek Coder
+### Core Providers
+- **Meta**: Llama 3.1/3.2 series (8B, 70B, 1B, 3B variants)
+- **Google**: Gemma 2/3 series (1B-27B parameters, multimodal capabilities)
+- **DeepSeek**: R1/V3/Coder series (8B-671B, reasoning and coding specialists)
+- **Microsoft**: Phi-3/4 series (3.8B-14B, efficient small models)
+- **Mistral**: Mistral/Large/Ministral series (7B-675B, European open-source leader)
 
-### Emerging Providers
-- **Alibaba (Qwen)**: Qwen 2.5/3 series
-- **Zhipu AI**: GLM-4/4.7/5 series
-- **IBM**: Granite 3 series
-- **01.AI**: Yi series
-- **BigCode**: StarCoder series
-- **Cohere**: Command R series
+### Advanced Providers
+- **Alibaba (Qwen)**: Qwen 2.5/3 series (0.5B-235B, multilingual with 128K+ context)
+- **IBM**: Granite/Code series (350M-34B, enterprise-grade models)
+- **BigCode**: StarCoder 2 series (3B-15B, specialized for code generation)
+- **Cohere**: Command R series (7B-35B, retrieval-augmented generation)
+- **01.AI**: Yi series (1.5B-34B, bilingual models)
+
+### Specialized Models
+- **Vision-Language**: LLaVA, Moondream, Qwen3-VL (7B-235B)
+- **Coding**: DeepSeek Coder, Qwen Coder, Granite Code, StarCoder 2
+- **Agentic**: Hermes 3, Reflection, Devstral Small 2 (3B-405B)
+- **Cloud-Only**: GPT-OSS, Gemini 3, GLM-5, MiniMax, Kimi (20B-744B)
 
 ### Cloud & Local Models
 - **Local Models**: Run entirely on your machine with Ollama
@@ -109,265 +117,59 @@ VEXIS-CLI-1 supports **80+ models** from **12 major providers**:
 <summary>Complete Model List</summary>
 
 **Popular Local Models:**
-- `llama3.2:latest` (9B) - Balanced performance
-- `qwen2.5:7b` - Multilingual capabilities
-- `mistral:7b` - Fast and efficient
-- `deepseek-coder` - Specialized for coding
+- `llama3.2:latest` (3B) - Balanced performance with 128K context
+- `qwen2.5:7b` - Multilingual capabilities with 128K context
+- `mistral:7b` - Fast and efficient with 32K context
+- `deepseek-r1:8b` - Advanced reasoning with 128K context
+- `gemma2:9b` - High-performing with 8K context
+- `phi3:mini` - Efficient small model with 4K context
 
 **High-Performance Cloud Models:**
-- `gpt-4o` - Advanced reasoning
-- `claude-3.5-sonnet` - Complex task handling
-- `gemini-3-flash-preview` - Speed and accuracy
-- `deepseek-r1:671b-cloud` - Massive scale reasoning
+- `deepseek-v3:671b` - State-of-the-art MoE with 160K context
+- `qwen3:235b` - Advanced MoE with 256K context
+- `mistral-large-3:675b-cloud` - Multimodal enterprise model
+- `gpt-oss:120b-cloud` - Frontier performance
+- `gemini-3-flash-preview:cloud` - Built for speed
 
 </details>
-
-```
 
 ## Usage Examples
 
-### File Operations
+### Quick Start
 ```bash
-# Natural language file management
-vexis-cli "Find all Python files over 1MB and move them to the archive folder"
+# Start the interactive interface
+python run.py
 
-# Batch processing
-vexis-cli "Convert all PNG images in this directory to WebP format"
+# Or use direct commands
+vexis-cli "List all Python files in the current directory"
 ```
 
-### Code Development
-```bash
-# Code review
-vexis-cli "Review this pull request and suggest improvements"
-
-# Documentation
-vexis-cli "Generate API documentation for the src/ai_agent module"
-```
-
-### System Administration
-```bash
-# System monitoring
-vexis-cli "Check disk usage and alert if any partition is over 80% full"
-
-# Log analysis
-vexis-cli "Analyze the last 1000 lines of application.log for error patterns"
-```
-
-### Workflow Automation
-```bash
-# Multi-step tasks
-vexis-cli "Set up a new Python project with virtual environment, install requirements, and initialize git"
-
-# Scheduled tasks
-vexis-cli "Create a cron job to backup the database every Sunday at 2 AM"
-```
-
-## Architecture
-
-```
-VEXIS-CLI-1 Architecture
-├── 🧠 AI Agent Core
-│   ├── Natural Language Processing
-│   ├── Task Planning & Execution
-│   └── Verification Engine
-├── 🔌 External Integration
-│   ├── Ollama Interface
-│   ├── Cloud API Connectors
-│   └── Platform Abstraction
-├── 🎨 User Interface
-│   ├── Rich Terminal Display
-│   ├── Interactive Mode
-│   └── Progress Indicators
-└── 🛠️ Utilities
-    ├── Configuration Management
-    ├── Logging & Monitoring
-    └── Error Handling
-```
-
-## Advanced Features
-
-### Two-Phase Execution Engine
-
-1. **Planning Phase**: Analyzes the request and creates an execution plan
-2. **Execution Phase**: Carries out the plan with real-time monitoring
-3. **Verification Phase**: Validates task completion and handles errors
-
-### Smart Context Management
-
-- **Session Memory**: Maintains context across multiple commands
-- **File Awareness**: Understands your project structure
-- **History Tracking**: Learns from your usage patterns
-
-### Error Recovery
-
-- **Automatic Retries**: Intelligent retry logic with exponential backoff
-- **Fallback Strategies**: Switches to alternative approaches on failure
-- **Detailed Logging**: Comprehensive error reporting for debugging
-
-## Development
-
-### Setting Up Development Environment
-
-1. **Clone and install**
-   ```bash
-   git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git
-   cd VEXIS-CLI-1
-   pip install -e ".[dev]"
-   ```
-
-2. **Run tests**
-   ```bash
-   python -m pytest tests/
-   ```
-
-3. **Development mode**
-   ```bash
-   python run.py --debug
-   ```
-
-### Project Structure
-
-```
-src/ai_agent/
-├── core_processing/          # AI processing logic
-├── external_integration/     # External API integrations
-├── platform_abstraction/     # Cross-platform compatibility
-├── user_interface/          # CLI and TUI components
-└── utils/                    # Utility functions
-```
-
-### Contributing Guidelines
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Performance
-
-### Benchmarks
-
-| Task | Local Model (Llama 3.2) | Cloud Model (GPT-4o) |
-|------|-------------------------|---------------------|
-| Simple Commands | ~2s | ~1s |
-| Code Generation | ~5s | ~2s |
-| Complex Analysis | ~15s | ~5s |
-| Multi-step Tasks | ~30s | ~10s |
-
-### Resource Usage
-
-- **Memory**: 2-8GB depending on model size
-- **CPU**: Moderate usage during processing
-- **Network**: Minimal for local models, variable for cloud models
-
-## Troubleshooting
-
-### Common Issues
-
-<details>
-<summary>Ollama Connection Failed</summary>
-
-**Problem**: Cannot connect to Ollama server
-**Solution**: 
-```bash
-# Check if Ollama is running
-ollama list
-
-# Restart Ollama
-ollama serve
-
-# Check configuration
-cat ~/.ollama/config
-```
-</details>
-
-<details>
-<summary>Model Not Found</summary>
-
-**Problem**: Model not available in Ollama
-**Solution**:
-```bash
-# Pull the model
-ollama pull llama3.2:latest
-
-# List available models
-ollama list
-```
-</details>
-
-<details>
-<summary>Permission Denied</summary>
-
-**Problem**: Cannot access certain files or directories
-**Solution**:
-```bash
-# Check permissions
-ls -la /path/to/file
-
-# Fix permissions (if safe)
-chmod 644 /path/to/file
-```
-</details>
-
-### Debug Mode
-
-Enable debug logging for troubleshooting:
-
-```bash
-export AI_AGENT_DEBUG=true
-python run.py --debug
-```
+For detailed usage examples, see our [Detailed Guide](DETAILED_GUIDE.md).
 
 ## Documentation
 
-- [API Reference](docs/API_REFERENCE.md)
-- [Architecture Guide](docs/ARCHITECTURE.md)
-- [Configuration Guide](docs/CONFIGURATION.md)
-- [Contributing Guide](docs/CONTRIBUTING.md)
+- [📖 Detailed Guide](DETAILED_GUIDE.md) - Comprehensive usage examples and advanced features
+- [🔧 Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
+- [📚 API Reference](docs/API_REFERENCE.md)
+- [🏗️ Architecture](docs/ARCHITECTURE.md)
+- [⚙️ Configuration](docs/CONFIGURATION.md)
+- [🤝 Contributing](docs/CONTRIBUTING.md)
 
 ## Community
 
 - **GitHub Issues**: [Report bugs and request features](https://github.com/AInohogosya-team/VEXIS-CLI-1/issues)
 - **Discussions**: [Join the community discussion](https://github.com/AInohogosya-team/VEXIS-CLI-1/discussions)
-- **Wiki**: [Community-maintained documentation](https://github.com/AInohogosya-team/VEXIS-CLI-1/wiki)
-
-## Roadmap
-
-### Version 1.1 (Q2 2026)
-- [ ] Enhanced GUI automation capabilities
-- [ ] Additional cloud provider integrations
-- [ ] Performance optimizations
-- [ ] Plugin system
-
-### Version 1.2 (Q3 2026)
-- [ ] Multi-modal AI support (vision, audio)
-- [ ] Advanced workflow orchestration
-- [ ] Team collaboration features
-- [ ] Mobile app companion
-
-### Version 2.0 (Q4 2026)
-- [ ] Distributed processing
-- [ ] Advanced security features
-- [ ] Enterprise integrations
-- [ ] Custom model training support
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-- [Ollama](https://ollama.com/) for making local AI accessible
-- [Rich](https://rich.readthedocs.io/) for beautiful terminal output
-- The open-source community for inspiration and contributions
-- All our beta testers and early adopters
-
 ## Support
 
 - 📧 Email: AInohogosya@proton.me
 - X: [AInohogosya](https://twitter.com/AInohogosya)
-- Home Page https://ainohogosya.github.io/home-page/
+- Home Page: https://ainohogosya.github.io/home-page/
+
 ---
 
 <div align="center">
