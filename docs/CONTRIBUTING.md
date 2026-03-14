@@ -2,7 +2,7 @@
 
 ## Overview
 
-Thank you for your interest in contributing to VEXIS-CLI-1! This guide covers everything you need to know to contribute effectively, from code standards to submission process.
+Thank you for your interest in contributing to VEXIS-CLI-1.1! This guide covers everything you need to know to contribute effectively, from code standards to submission process.
 
 ## Getting Started
 
@@ -18,13 +18,13 @@ Thank you for your interest in contributing to VEXIS-CLI-1! This guide covers ev
 1. **Fork the Repository**
    ```bash
    # Fork on GitHub, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/VEXIS-CLI-1.git
-   cd VEXIS-CLI-1
+   git clone https://github.com/YOUR_USERNAME/VEXIS-CLI-1.1.git
+   cd VEXIS-CLI-1.1
    ```
 
 2. **Add Upstream Remote**
    ```bash
-   git remote add upstream https://github.com/AInohogosya-team/VEXIS-CLI-1.git
+   git remote add upstream https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
    ```
 
 3. **Set Up Development Environment**
@@ -249,7 +249,7 @@ except Exception as e:
 
 # Create custom exceptions
 class VexisError(Exception):
-    """Base exception for VEXIS-CLI-1."""
+    """Base exception for VEXIS-CLI-1.1."""
     pass
 
 class ValidationError(VexisError):
@@ -834,4 +834,4 @@ flake8 src/ --show-source
    - @mention maintainers in issues
    - Request review on PRs
 
-Thank you for contributing to VEXIS-CLI-1! Your contributions help make this project better for everyone.
+Thank you for contributing to VEXIS-CLI-1.1! Your contributions help make this project better for everyone.

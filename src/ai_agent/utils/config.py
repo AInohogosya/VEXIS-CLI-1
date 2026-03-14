@@ -4,6 +4,7 @@ Zero-defect policy: comprehensive configuration with validation
 """
 
 import os
+import yaml
 import json
 from typing import Dict, Any, Optional, Union
 from pathlib import Path
@@ -12,9 +13,14 @@ from .exceptions import ConfigurationError, ValidationError
 
 
 def _get_ollama_model_from_settings() -> str:
-    """Get the Ollama model - always returns default to force selection"""
-    # Settings file reading removed - always return default
-    return "llama3.2:latest"
+    """Get the Ollama model from settings manager, with fallback to default"""
+    try:
+        from .settings_manager import get_settings_manager
+        settings = get_settings_manager()
+        model = settings.get_ollama_model()
+        return model if model else "llama3.2:latest"
+    except Exception:
+        return "llama3.2:latest"
 
 
 @dataclass
@@ -40,7 +46,7 @@ class APIConfig:
     timeout: int = 30
     max_retries: int = 3
     retry_delay: float = 1.0
-    preferred_provider: str = "ollama"  # "ollama" only
+    preferred_provider: str = ""  # Must be explicitly set by user
 
 
 @dataclass
@@ -66,18 +72,6 @@ class PerformanceConfig:
 
 
 @dataclass
-class VerificationConfig:
-    """Task completion verification configuration"""
-    enabled: bool = True
-    confidence_threshold: float = 0.8
-    max_verification_attempts: int = 3
-    max_regenerations: int = 2
-    verification_model: str = field(default_factory=lambda: _get_ollama_model_from_settings())
-    verification_timeout: int = 60
-    auto_regenerate: bool = True
-
-
-@dataclass
 class EngineConfig:
     """Two-phase engine configuration"""
     click_delay: float = 0.1
@@ -100,7 +94,6 @@ class Config:
     api: APIConfig = field(default_factory=APIConfig)
     security: SecurityConfig = field(default_factory=SecurityConfig)
     performance: PerformanceConfig = field(default_factory=PerformanceConfig)
-    verification: VerificationConfig = field(default_factory=VerificationConfig)
     engine: EngineConfig = field(default_factory=EngineConfig)
     
     # Platform-specific settings
@@ -151,16 +144,23 @@ class ConfigManager:
             "api": {"timeout": 30, "max_retries": 3},
             "security": {"command_timeout": 30},
             "performance": {"max_concurrent_tasks": 1},
-            "verification": {"enabled": True, "confidence_threshold": 0.8},
             "engine": {"click_delay": 0.1, "typing_delay": 0.05},
         }
         
         # Load from file if exists
         if self.config_path and self.config_path.exists():
             try:
-                # Only support JSON files now
-                with open(self.config_path, 'r') as f:
-                    file_config = json.load(f)
+                if self.config_path.suffix.lower() in ['.yaml', '.yml']:
+                    with open(self.config_path, 'r') as f:
+                        file_config = yaml.safe_load(f)
+                elif self.config_path.suffix.lower() == '.json':
+                    with open(self.config_path, 'r') as f:
+                        file_config = json.load(f)
+                else:
+                    raise ConfigurationError(
+                        f"Unsupported config file format: {self.config_path.suffix}",
+                        config_file=str(self.config_path)
+                    )
                 
                 # Merge with default config
                 self._merge_config(self._raw_config, file_config)
@@ -196,21 +196,13 @@ class ConfigManager:
             "AI_AGENT_COMMAND_TIMEOUT": ("security", "command_timeout"),
             "AI_AGENT_MAX_CONCURRENT_TASKS": ("performance", "max_concurrent_tasks"),
             "AI_AGENT_TASK_TIMEOUT": ("performance", "task_timeout"),
-            "AI_AGENT_VERIFICATION_ENABLED": ("verification", "enabled"),
-            "AI_AGENT_VERIFICATION_CONFIDENCE_THRESHOLD": ("verification", "confidence_threshold"),
-            "AI_AGENT_VERIFICATION_MAX_ATTEMPTS": ("verification", "max_verification_attempts"),
-            "AI_AGENT_VERIFICATION_MAX_REGENERATIONS": ("verification", "max_regenerations"),
-            "AI_AGENT_VERIFICATION_MODEL": ("verification", "verification_model"),
-            "AI_AGENT_VERIFICATION_TIMEOUT": ("verification", "verification_timeout"),
-            "AI_AGENT_VERIFICATION_AUTO_REGENERATE": ("verification", "auto_regenerate"),
         }
         
         for env_var, (section, key) in env_mappings.items():
             value = os.getenv(env_var)
             if value is not None:
                 # Type conversion
-                if key in ["timeout", "max_retries", "command_timeout", "max_concurrent_tasks", "task_timeout",
-                          "max_verification_attempts", "max_regenerations", "verification_timeout"]:
+                if key in ["timeout", "max_retries", "command_timeout", "max_concurrent_tasks", "task_timeout"]:
                     try:
                         if '.' in value:
                             value = float(value)
@@ -218,7 +210,7 @@ class ConfigManager:
                             value = int(value)
                     except ValueError:
                         continue
-                elif key in ["json_format", "console", "enabled", "auto_regenerate"]:
+                elif key in ["json_format", "console", "enabled"]:
                     value = value.lower() in ['true', '1', 'yes', 'on']
                 
                 # Set in config
@@ -231,22 +223,32 @@ class ConfigManager:
         try:
             # Get API config dict and override with settings manager if needed
             api_config_dict = self._raw_config.get("api", {})
-            verification_config_dict = self._raw_config.get("verification", {})
             
-            # Settings file reading removed - use defaults only
-            api_config_dict = self._raw_config.get("api", {})
-            verification_config_dict = self._raw_config.get("verification", {})
-            
-            # Always use default models to force selection
-            import logging
-            logging.getLogger("config").info("Using default models - settings file reading removed")
+            # Override model values from settings manager to ensure user selection takes precedence
+            ollama_model = None
+            try:
+                # Read settings file directly to avoid circular dependency with SettingsManager
+                import json
+                settings_path = Path(__file__).parent.parent.parent.parent / ".vexis" / "settings.json"
+                if settings_path.exists():
+                    with open(settings_path, 'r') as f:
+                        settings_data = json.load(f)
+                        ollama_model = settings_data.get("ollama_model")
+                        if ollama_model:
+                            api_config_dict["local_model"] = ollama_model
+                            # Debug logging
+                            import logging
+                            logging.getLogger("config").info(f"Overriding config with settings model: {ollama_model}")
+            except Exception as e:
+                import logging
+                logging.getLogger("config").warning(f"Could not override from settings file: {e}")
+                pass  # Fall back to config file values or defaults
             
             return Config(
                 logging=LoggingConfig(**self._raw_config.get("logging", {})),
                 api=APIConfig(**api_config_dict),
                 security=SecurityConfig(**self._raw_config.get("security", {})),
                 performance=PerformanceConfig(**self._raw_config.get("performance", {})),
-                verification=VerificationConfig(**verification_config_dict),
                 engine=EngineConfig(**self._raw_config.get("engine", {})),
                 platform=self._raw_config.get("platform", {}),
                 custom=self._raw_config.get("custom", {}),
@@ -313,9 +315,17 @@ class ConfigManager:
         save_path.parent.mkdir(parents=True, exist_ok=True)
         
         try:
-            # Only support JSON files now
-            with open(save_path, 'w') as f:
-                json.dump(config_dict, f, indent=2)
+            if save_path.suffix.lower() in ['.yaml', '.yml']:
+                with open(save_path, 'w') as f:
+                    yaml.dump(config_dict, f, default_flow_style=False, indent=2)
+            elif save_path.suffix.lower() == '.json':
+                with open(save_path, 'w') as f:
+                    json.dump(config_dict, f, indent=2)
+            else:
+                raise ConfigurationError(
+                    f"Unsupported config file format: {save_path.suffix}",
+                    config_file=str(save_path)
+                )
         except Exception as e:
             raise ConfigurationError(
                 f"Failed to save config file: {e}",

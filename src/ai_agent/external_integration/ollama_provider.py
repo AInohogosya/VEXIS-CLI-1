@@ -100,13 +100,7 @@ class SimpleOllamaProvider:
         # Define payload first (needed for task type detection)
         payload = {
             "model": model,
-            "messages": [
-                {
-                    "role": "system", 
-                    "content": "CRITICAL: Never use markdown formatting, code blocks (```), or any special characters in your responses. Output plain text only that can be directly executed in a terminal without any modification."
-                },
-                {"role": "user", "content": prompt}
-            ],
+            "messages": [{"role": "user", "content": prompt}],
             "stream": False,
             "options": {
                 "temperature": temperature,

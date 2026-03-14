@@ -1,262 +1,408 @@
-# VEXIS-CLI-1 詳細ガイド
-
-このドキュメントでは、VEXIS-CLI-1の詳細な使い方、高度な機能、トラブルシューティングについて説明します。
-
-## 目次
-
-- [詳細な使用例](#詳細な使用例)
-- [高度な機能](#高度な機能)
-- [アーキテクチャ詳細](#アーキテクチャ詳細)
-- [トラブルシューティング](#トラブルシューティング)
-- [パフォーマンス最適化](#パフォーマンス最適化)
-- [開発者向け情報](#開発者向け情報)
-
-## 詳細な使用例
-
-### ファイル操作
-
-```bash
-# 自然言語でのファイル管理
-vexis-cli "Find all Python files over 1MB and move them to the archive folder"
-
-# バッチ処理
-vexis-cli "Convert all PNG images in this directory to WebP format"
-
-# 高度なファイル検索
-vexis-cli "Find all files modified in the last 7 days containing 'TODO' in their content"
-```
-
-### コード開発
-
-```bash
-# コードレビュー
-vexis-cli "Review this pull request and suggest improvements"
-
-# ドキュメント生成
-vexis-cli "Generate API documentation for the src/ai_agent module"
-
-# リファクタリング
-vexis-cli "Refactor this function to use modern Python patterns and add type hints"
-```
-
-### システム管理
-
-```bash
-# システム監視
-vexis-cli "Check disk usage and alert if any partition is over 80% full"
-
-# ログ分析
-vexis-cli "Analyze the last 1000 lines of application.log for error patterns"
-
-# パフォーマンス監視
-vexis-cli "Monitor CPU usage for the next 5 minutes and alert if it exceeds 90%"
-```
-
-### ワークフロー自動化
-
-```bash
-# マルチステップタスク
-vexis-cli "Set up a new Python project with virtual environment, install requirements, and initialize git"
-
-# スケジュールタスク
-vexis-cli "Create a cron job to backup the database every Sunday at 2 AM"
-
-# デプロイ自動化
-vexis-cli "Deploy the current application to staging environment and run health checks"
-```
-
-## 高度な機能
-
-### Two-Phase Execution Engine
-
-1. **Planning Phase**: リクエストを分析し実行計画を作成
-2. **Execution Phase**: 計画を実行しリアルタイムで監視
-3. **Verification Phase**: タスク完了を検証しエラーを処理
-
-### Smart Context Management
-
-- **Session Memory**: 複数のコマンド間でコンテキストを維持
-- **File Awareness**: プロジェクト構造を理解
-- **History Tracking**: 使用パターンから学習
-
-### Error Recovery
-
-- **Automatic Retries**: 指数バックオフ付きのインテリジェントリトライ
-- **Fallback Strategies**: 失敗時に代替アプローチに切り替え
-- **Detailed Logging**: デバッグ用の詳細なエラーレポート
-
-## アーキテクチャ詳細
-
-```
-VEXIS-CLI-1 Architecture
-├── 🧠 AI Agent Core
-│   ├── Natural Language Processing
-│   ├── Task Planning & Execution
-│   └── Verification Engine
-├── 🔌 External Integration
-│   ├── Ollama Interface
-│   ├── Cloud API Connectors
-│   └── Platform Abstraction
-├── 🎨 User Interface
-│   ├── Rich Terminal Display
-│   ├── Interactive Mode
-│   └── Progress Indicators
-└── 🛠️ Utilities
-    ├── Configuration Management
-    ├── Logging & Monitoring
-    └── Error Handling
-```
-
-## トラブルシューティング
-
-### 一般的な問題
-
-#### Ollama接続失敗
-
-**問題**: Ollamaサーバーに接続できない
-**解決策**: 
-```bash
-# Ollamaが実行中か確認
-ollama list
-
-# Ollamaを再起動
-ollama serve
-
-# 設定を確認
-cat ~/.ollama/config
-```
-
-#### モデルが見つからない
-
-**問題**: Ollamaでモデルが利用できない
-**解決策**:
-```bash
-# モデルをプル
-ollama pull llama3.2:latest
-
-# 利用可能なモデル一覧
-ollama list
-```
-
-#### パーミッション拒否
-
-**問題**: 特定のファイルやディレクトリにアクセスできない
-**解決策**:
-```bash
-# パーミッションを確認
-ls -la /path/to/file
-
-# パーミッションを修正（安全な場合）
-chmod 644 /path/to/file
-```
-
-### 高度なトラブルシューティング
-
-#### メモリ不足エラー
-
-**症状**: 大きなモデル実行時にメモリ不足
-**解決策**:
-- より小さなモデルを使用（例: `llama3.2:1b`）
-- スワップメモリを増設
-- 他のアプリケーションを終了
-
-#### ネットワーク接続問題
-
-**症状**: クラウドモデルに接続できない
-**解決策**:
-```bash
-# 接続テスト
-curl -I https://api.openai.com/v1/models
-
-# プロキシ設定を確認
-echo $HTTP_PROXY
-echo $HTTPS_PROXY
-
-# DNS解決を確認
-nslookup api.openai.com
-```
-
-#### モデル応答が遅い
-
-**症状**: モデルの応答が極端に遅い
-**解決策**:
-- GPUアクセラレーションを有効化
-- より小さなモデルに切り替え
-- コンテキスト長を短縮
-
-### デバッグモード
-
-デバッグログを有効化：
-
-```bash
-export AI_AGENT_DEBUG=true
-python run.py --debug
-```
-
-## パフォーマンス最適化
-
-### ベンチマーク
-
-| タスク | ローカルモデル (Llama 3.2) | クラウドモデル (GPT-OSS) |
-|------|-------------------------|---------------------|
-| シンプルコマンド | ~2s | ~1s |
-| コード生成 | ~5s | ~2s |
-| 複雑な分析 | ~15s | ~5s |
-| マルチステップタスク | ~30s | ~10s |
-
-### リソース使用量
-
-- **メモリ**: 2-8GB（モデルサイズに依存）
-- **CPU**: 処理中に中程度の使用量
-- **ネットワーク**: ローカルモデルでは最小限、クラウドモデルでは可変
-
-### 最適化ヒント
-
-1. **モデル選択**: タスクに適したサイズのモデルを選択
-2. **コンテキスト管理**: 不要なコンテキストをクリア
-3. **バッチ処理**: 類似タスクをまとめて実行
-4. **キャッシュ活用**: 頻繁使用するモデルをローカルにキャッシュ
-
-## 開発者向け情報
-
-### 開発環境セットアップ
-
-1. **クローンとインストール**
-   ```bash
-   git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git
-   cd VEXIS-CLI-1
-   pip install -e ".[dev]"
-   ```
-
-2. **テスト実行**
-   ```bash
-   python -m pytest tests/
-   ```
-
-3. **開発モード**
-   ```bash
-   python run.py --debug
-   ```
-
-### プロジェクト構造
-
-```
-src/ai_agent/
-├── core_processing/          # AI処理ロジック
-├── external_integration/     # 外部API統合
-├── platform_abstraction/     # クロスプラットフォーム互換性
-├── user_interface/          # CLIとTUIコンポーネント
-└── utils/                    # ユーティリティ関数
-```
-
-### コントリビューション
-
-1. リポジトリをフォーク
-2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを開く
+# VEXIS-CLI-1.1 Detailed User Guide
+
+## Table of Contents
+
+1. [Getting Started](#getting-started)
+2. [Installation & Setup](#installation--setup)
+3. [Configuration](#configuration)
+4. [Usage Examples](#usage-examples)
+5. [AI Provider Setup](#ai-provider-setup)
+6. [Advanced Features](#advanced-features)
+7. [Troubleshooting](#troubleshooting)
+8. [Best Practices](#best-practices)
 
 ---
 
-詳細な情報については、メインのREADME.mdや他のドキュメントを参照してください。
+## Getting Started
+
+### What is VEXIS-CLI-1.1?
+
+VEXIS-CLI-1.1 is an intelligent command-line agent that transforms natural language instructions into executable terminal commands. It supports multiple AI providers and offers both local (privacy-first) and cloud-based options.
+
+### Key Features
+
+- **Natural Language Processing**: Convert plain English commands to terminal operations
+- **Multi-Provider Support**: 13+ AI providers including local Ollama models
+- **Error Handling**: Intelligent error recovery and user guidance
+- **One-Liner Execution**: Simple `python3 run.py "your command"` syntax
+- **Cross-Platform**: Works on macOS, Linux, and Windows
+
+---
+
+## Installation & Setup
+
+### Quick Start (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
+cd VEXIS-CLI-1.1
+
+# Run your first command (dependencies auto-installed)
+python3 run.py "list files in current directory"
+```
+
+### Manual Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
+cd VEXIS-CLI-1.1
+
+# 2. Create virtual environment (optional but recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Run the agent
+python3 run.py "your instruction here"
+```
+
+### System Requirements
+
+- **Python**: 3.9 or higher
+- **Memory**: 4GB+ RAM recommended
+- **Storage**: 2GB+ free space
+- **Network**: Internet connection for cloud providers
+
+---
+
+## Configuration
+
+### Basic Configuration
+
+Edit `config.yaml` to customize your setup:
+
+```yaml
+api:
+  preferred_provider: "ollama"  # Your preferred AI provider
+  local_endpoint: "http://localhost:11434"  # Ollama endpoint
+  local_model: "gemma3:4b"  # Default local model
+  timeout: 120  # Request timeout in seconds
+  max_retries: 3  # Maximum retry attempts
+
+verification:
+  enabled: true  # Enable task verification
+  confidence_threshold: 0.8  # Verification confidence threshold
+  max_verification_attempts: 3  # Max verification tries
+
+engine:
+  command_timeout: 30  # Command execution timeout
+  task_timeout: 300  # Overall task timeout
+  max_task_retries: 3  # Maximum task retries
+```
+
+### Environment Variables
+
+You can override configuration using environment variables:
+
+```bash
+export AI_AGENT_LOCAL_ENDPOINT="http://localhost:11434"
+export AI_AGENT_PREFERRED_PROVIDER="ollama"
+export AI_AGENT_LOCAL_MODEL="llama3.2:latest"
+```
+
+---
+
+## Usage Examples
+
+### Basic Commands
+
+```bash
+# File operations
+python3 run.py "create a file called hello.txt with content 'Hello World'"
+python3 run.py "list all Python files in the current directory"
+python3 run.py "copy hello.txt to backup_hello.txt"
+
+# System information
+python3 run.py "show system information"
+python3 run.py "check disk usage"
+python3 run.py "list running processes"
+
+# Development tasks
+python3 run.py "create a new Python project structure"
+python3 run.py "install requirements from requirements.txt"
+python3 run.py "run tests for the current project"
+```
+
+### Advanced Commands
+
+```bash
+# With options
+python3 run.py "deploy the application" --debug
+python3 run.py "setup development environment" --no-prompt
+
+# Complex workflows
+python3 run.py "create a backup of all configuration files"
+python3 run.py "setup a Python development environment with Django"
+```
+
+---
+
+## AI Provider Setup
+
+### Local Providers
+
+#### Ollama Setup
+
+1. **Install Ollama**:
+   ```bash
+   # macOS
+   brew install ollama
+   
+   # Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+   
+   # Windows
+   # Download from https://ollama.ai/download
+   ```
+
+2. **Start Ollama Service**:
+   ```bash
+   ollama serve
+   ```
+
+3. **Download Models**:
+   ```bash
+   ollama pull gemma3:4b
+   ollama pull qwen2.5:3b
+   ollama pull deepseek-r1:7b
+   ```
+
+4. **Configure VEXIS-CLI**:
+   ```yaml
+   api:
+     preferred_provider: "ollama"
+     local_model: "gemma3:4b"
+   ```
+
+### Cloud Providers
+
+#### Google Gemini
+
+1. **Get API Key**:
+   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create a new API key
+
+2. **Configure**:
+   ```bash
+   export GOOGLE_API_KEY="your-api-key-here"
+   ```
+
+3. **Update config**:
+   ```yaml
+   api:
+     preferred_provider: "google"
+   ```
+
+#### OpenAI
+
+1. **Get API Key**:
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create a new API key
+
+2. **Configure**:
+   ```bash
+   export OPENAI_API_KEY="your-api-key-here"
+   ```
+
+#### Anthropic
+
+1. **Get API Key**:
+   - Visit [Anthropic Console](https://console.anthropic.com/)
+   - Create a new API key
+
+2. **Configure**:
+   ```bash
+   export ANTHROPIC_API_KEY="your-api-key-here"
+   ```
+
+#### Groq
+
+1. **Get API Key**:
+   - Visit [Groq Console](https://console.groq.com/)
+   - Create a new API key
+
+2. **Configure**:
+   ```bash
+   export GROQ_API_KEY="your-api-key-here"
+   ```
+
+#### Additional Providers
+
+Similar setup process for:
+- **xAI**: `XAI_API_KEY` (Grok models)
+- **Meta**: `META_API_KEY` (Llama models)
+- **Mistral AI**: `MISTRAL_API_KEY` (Mistral models)
+- **Microsoft Azure**: `AZURE_API_KEY` (GPT via Azure)
+- **Amazon Bedrock**: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- **Cohere**: `COHERE_API_KEY` (Command models)
+- **DeepSeek**: `DEEPSEEK_API_KEY` (Reasoning models)
+- **Together AI**: `TOGETHER_API_KEY` (Open-source hosting)
+
+---
+
+## Advanced Features
+
+### Two-Phase Execution Engine
+
+VEXIS-CLI-1.1 uses a sophisticated two-phase execution:
+
+1. **Command Planning Phase**:
+   - Natural language understanding
+   - Task decomposition
+   - Command generation
+
+2. **Terminal Execution Phase**:
+   - Command execution
+   - Error handling
+   - Result verification
+
+### Task Verification
+
+The system includes intelligent task verification:
+
+```yaml
+verification:
+  enabled: true
+  confidence_threshold: 0.8
+  max_verification_attempts: 3
+  auto_regenerate: true
+```
+
+### Error Recovery
+
+Automatic error recovery mechanisms:
+- **Retry Logic**: Automatic retries for transient failures
+- **Fallback Models**: Switch to alternative models on failure
+- **User Guidance**: Helpful error messages and suggestions
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### Ollama Connection Issues
+
+```bash
+# Check if Ollama is running
+ollama list
+
+# Restart Ollama service
+ollama serve
+
+# Check connection
+curl http://localhost:11434/api/tags
+```
+
+#### Permission Errors (macOS)
+
+1. **Full Disk Access**:
+   - Go to System Preferences > Security & Privacy > Privacy
+   - Add Terminal to Full Disk Access
+
+2. **Permission Fix**:
+   ```bash
+   chmod +x run.py
+   ```
+
+#### Model Compatibility Issues
+
+Some models may have compatibility issues. Recommended alternatives:
+- `gemma3:4b` - Most stable
+- `qwen2.5:3b` - Lightweight and reliable
+- `deepseek-r1:7b` - Advanced reasoning
+
+#### Dependency Issues
+
+```bash
+# Reinstall dependencies
+pip install -r requirements.txt --force-reinstall
+
+# Update pip
+pip install --upgrade pip
+
+# Clean install
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Debug Mode
+
+Enable verbose logging:
+
+```bash
+python3 run.py "your command" --debug
+```
+
+### Getting Help
+
+1. Check the [Troubleshooting Guide](./docs/TROUBLESHOOTING.md)
+2. Review [Error Handling Documentation](./docs/ERROR_HANDLING.md)
+3. Check GitHub Issues
+4. Join community discussions
+
+---
+
+## Best Practices
+
+### Performance Optimization
+
+1. **Choose the Right Model**:
+   - Local: `gemma3:4b` for balance
+   - Cloud: Google Gemini for reliability
+   - Fast: Groq for speed
+
+2. **Optimize Commands**:
+   - Be specific in your instructions
+   - Break complex tasks into smaller steps
+   - Use appropriate model for task complexity
+
+### Security Considerations
+
+1. **API Keys**: Never commit API keys to version control
+2. **Local Models**: Use Ollama for sensitive data
+3. **Network**: Use secure connections for cloud providers
+
+### Productivity Tips
+
+1. **Aliases**: Create shell aliases for common tasks
+2. **Scripts**: Build reusable command scripts
+3. **Configuration**: Fine-tune settings for your workflow
+
+---
+
+## FAQ
+
+### Q: Which provider should I use?
+**A**: For privacy: Ollama. For speed: Groq. For reliability: Google Gemini.
+
+### Q: How do I handle large tasks?
+**A**: Break them into smaller, specific commands for better results.
+
+### Q: Can I use multiple providers?
+**A**: Yes, configure fallback providers in your config file.
+
+### Q: Is my data secure?
+**A**: Local Ollama models keep data on your machine. Cloud providers send data to their servers.
+
+### Q: How do I update VEXIS-CLI?
+**A**: `git pull origin main` and reinstall dependencies if needed.
+
+---
+
+## Support & Community
+
+- **Documentation**: [Full docs](./docs/)
+- **Issues**: [GitHub Issues](https://github.com/AInohogosya-team/VEXIS-CLI-1.1/issues)
+- **Updates**: Check the repository regularly for updates
+
+---
+
+**Version**: 1.0.0  
+**Last Updated**: 2026-03-12  
+**Compatibility**: Python 3.9+

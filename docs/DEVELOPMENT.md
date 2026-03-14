@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers development setup, coding standards, testing practices, and contribution guidelines for VEXIS-CLI-1.
+This guide covers development setup, coding standards, testing practices, and contribution guidelines for VEXIS-CLI-1.1.
 
 ## Development Environment Setup
 
@@ -17,8 +17,8 @@ This guide covers development setup, coding standards, testing practices, and co
 
 ```bash
 # Clone the repository
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git
-cd VEXIS-CLI-1
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
+cd VEXIS-CLI-1.1
 
 # Create virtual environment
 python3 -m venv venv
@@ -110,7 +110,7 @@ tox>=4.0.0
 ## Project Structure
 
 ```
-VEXIS-CLI-1/
+VEXIS-CLI-1.1/
 ├── src/
 │   └── ai_agent/
 │       ├── core_processing/          # Core logic
@@ -1092,4 +1092,4 @@ def debug_config():
         traceback.print_exc()
 ```
 
-This development guide provides comprehensive information for contributing to VEXIS-CLI-1, from initial setup to advanced debugging and optimization techniques.
+This development guide provides comprehensive information for contributing to VEXIS-CLI-1.1, from initial setup to advanced debugging and optimization techniques.

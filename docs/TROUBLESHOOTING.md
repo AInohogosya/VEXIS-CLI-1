@@ -2,7 +2,7 @@
 
 ## Overview
 
-This comprehensive troubleshooting guide covers common issues, their causes, and step-by-step solutions for VEXIS-CLI-1.
+This comprehensive troubleshooting guide covers common issues, their causes, and step-by-step solutions for VEXIS-CLI-1.1.
 
 ## Quick Diagnosis
 
@@ -113,7 +113,7 @@ Administrator privileges required
    ```
 
 3. **Configure Antivirus:**
-   - Add VEXIS-CLI-1 to antivirus exclusions
+   - Add VEXIS-CLI-1.1 to antivirus exclusions
    - Allow Terminal/PowerShell execution
 
 ### 2. Ollama Model Issues
@@ -576,7 +576,7 @@ grep -i "permission\|denied" logs/vexis.log
 #!/bin/bash
 # health_check.sh
 
-echo "=== VEXIS-CLI-1 Health Check ==="
+echo "=== VEXIS-CLI-1.1 Health Check ==="
 
 # Check Python
 python3 --version
@@ -646,7 +646,7 @@ When all else fails, perform a clean reset:
 #!/bin/bash
 # reset_system.sh
 
-echo "⚠️  This will reset VEXIS-CLI-1 completely"
+echo "⚠️  This will reset VEXIS-CLI-1.1 completely"
 read -p "Continue? (y/N): " confirm
 
 if [[ $confirm == "y" ]]; then
@@ -701,7 +701,7 @@ fi
 #!/bin/bash
 # maintenance.sh
 
-echo "=== VEXIS-CLI-1 Maintenance ==="
+echo "=== VEXIS-CLI-1.1 Maintenance ==="
 
 # Update models
 echo "Updating models..."

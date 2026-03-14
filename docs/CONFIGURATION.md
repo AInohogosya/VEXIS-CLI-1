@@ -2,7 +2,26 @@
 
 ## Overview
 
-VEXIS-CLI-1 uses a flexible configuration system that supports multiple providers, customization options, and environment-specific settings. This guide covers all configuration aspects from basic setup to advanced customization.
+VEXIS-CLI-1.1 uses a flexible configuration system that supports 13+ AI providers, customization options, and environment-specific settings. This guide covers all configuration aspects from basic setup to advanced customization.
+
+## Supported Providers
+
+### Local Providers
+- **Ollama**: Local models with privacy-first design
+
+### Cloud Providers (API Key Required)
+- **Groq**: Fast inference with Llama/Mixtral models
+- **Google Gemini**: Enterprise-grade cloud models
+- **OpenAI**: GPT models with advanced capabilities
+- **Anthropic**: Claude models with strong reasoning
+- **xAI**: Grok models for real-time knowledge
+- **Meta**: Llama models via Meta API
+- **Mistral AI**: Advanced multilingual models
+- **Microsoft Azure**: GPT models via Azure
+- **Amazon Bedrock**: Titan/Nova models via AWS
+- **Cohere**: Command models for enterprise
+- **DeepSeek**: Advanced reasoning models
+- **Together AI**: Open-source model hosting
 
 ## Configuration Files
 
@@ -11,12 +30,12 @@ VEXIS-CLI-1 uses a flexible configuration system that supports multiple provider
 **File**: `config.yaml`
 
 ```yaml
-# VEXIS-CLI-1 Configuration File
+# VEXIS-CLI-1.1 Configuration File
 # Version: 1.0.0
 
 # AI Provider Configuration
 api:
-  # Primary AI provider: "ollama" or "google"
+  # Primary AI provider: "ollama", "groq", "google", "openai", "anthropic", "xai", "meta", "mistral", "microsoft", "amazon", "cohere", "deepseek", "together"
   preferred_provider: "ollama"
   
   # Ollama Configuration
@@ -26,6 +45,18 @@ api:
   # Google Gemini Configuration
   google_api_key: null  # Set via environment variable or here
   gemini_model: "gemini-1.5-flash"
+  
+  # OpenAI Configuration
+  openai_api_key: null  # Set via environment variable or here
+  openai_model: "gpt-5.4"
+  
+  # Anthropic Configuration
+  anthropic_api_key: null  # Set via environment variable or here
+  anthropic_model: "claude-opus-4-6-20251120"
+  
+  # Groq Configuration
+  groq_api_key: null  # Set via environment variable or here
+  groq_model: "llama-3.3-70b-versatile"
   
   # API Settings
   timeout: 120          # Request timeout in seconds
@@ -148,7 +179,19 @@ development:
 ```bash
 # API Keys
 GOOGLE_API_KEY=your-google-api-key-here
-OLLAMA_API_KEY=your-ollama-api-key-here
+OPENAI_API_KEY=your-openai-api-key-here
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+XAI_API_KEY=your-xai-api-key-here
+META_API_KEY=your-meta-api-key-here
+MISTRAL_API_KEY=your-mistral-api-key-here
+AZURE_OPENAI_API_KEY=your-azure-api-key-here
+AZURE_OPENAI_ENDPOINT=your-azure-endpoint
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+COHERE_API_KEY=your-cohere-api-key-here
+DEEPSEEK_API_KEY=your-deepseek-api-key-here
+GROQ_API_KEY=your-groq-api-key-here
+TOGETHER_API_KEY=your-together-api-key-here
 
 # Endpoints
 OLLAMA_HOST=http://localhost:11434
@@ -715,4 +758,4 @@ python3 run.py --test-providers
 3. **Validate Configs** before use
 4. **Monitor Configuration** changes
 
-This comprehensive configuration system provides flexibility while maintaining security and performance standards for VEXIS-CLI-1 deployments.
+This comprehensive configuration system provides flexibility while maintaining security and performance standards for VEXIS-CLI-1.1 deployments.

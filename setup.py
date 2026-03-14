@@ -70,15 +70,15 @@ def check_python_deps():
     # Check if we're in a virtual environment
     if sys.prefix == sys.base_prefix:
         print("⚠️  Not in a virtual environment")
-        response = input("Would you like to create a virtual environment? (y/n): ")
+        response = input("Would you like to create a project-level virtual environment? (y/n): ")
         if response.lower() == 'y':
-            if not run_command("python3 -m venv venv", "Creating virtual environment"):
+            if not run_command("python3 -m venv venv", "Creating project-level virtual environment"):
                 return False
-            print("✅ Virtual environment created")
+            print("✅ Project-level virtual environment created at ./venv")
             print("Please run: source venv/bin/activate && python3 run.py 'your command'")
             return False
     else:
-        print("✅ Running in virtual environment")
+        print("✅ Running in project-level virtual environment")
     
     # Check requirements
     requirements_file = Path("requirements.txt")

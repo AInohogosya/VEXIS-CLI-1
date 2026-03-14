@@ -2,7 +2,7 @@
 
 ## Overview
 
-This comprehensive API reference covers all public interfaces, classes, methods, and data structures available in VEXIS-CLI-1.
+This comprehensive API reference covers all public interfaces, classes, methods, and data structures available in VEXIS-CLI-1.1.
 
 ## Core Components
 
@@ -115,7 +115,7 @@ else:
 
 **Location**: `src/ai_agent/external_integration/model_runner.py`
 
-Unified AI provider abstraction supporting Ollama and Google Gemini.
+Unified AI provider abstraction supporting 13+ providers: Ollama (local), Google Gemini, OpenAI, Anthropic, xAI, Meta, Mistral AI, Microsoft Azure, Amazon Bedrock, Cohere, DeepSeek, Groq, and Together AI.
 
 #### Class Definition
 
@@ -148,7 +148,7 @@ async def generate_response(
     Args:
         task_type: Type of task (task_generation or command_parsing)
         prompt: Prompt to send to model
-        provider: Specific provider to use (ollama or google)
+        provider: Specific provider to use (ollama, groq, google, openai, anthropic, xai, meta, mistral, microsoft, amazon, cohere, deepseek, together)
         **kwargs: Additional parameters for the model
         
     Returns:
@@ -167,7 +167,7 @@ def is_provider_available(self, provider: str) -> bool:
     """Check if a specific provider is available.
     
     Args:
-        provider: Provider name (ollama or google)
+        provider: Provider name (ollama, groq, google, openai, anthropic, xai, meta, mistral, microsoft, amazon, cohere, deepseek, together)
         
     Returns:
         bool: True if provider is available
@@ -201,7 +201,7 @@ runner = ModelRunner(config)
 response = await runner.generate_response(
     task_type=TaskType.TASK_GENERATION,
     prompt="Generate a command to list files",
-    provider="ollama"
+    provider="groq"  # or any supported provider
 )
 
 if response.success:
@@ -785,7 +785,7 @@ def mock_ollama_response():
 
 ### Version Compatibility
 
-This API reference covers VEXIS-CLI-1 version 1.0.0.
+This API reference covers VEXIS-CLI-1.1 version 1.0.0.
 
 #### Breaking Changes from 0.x
 
@@ -823,4 +823,4 @@ This API reference covers VEXIS-CLI-1 version 1.0.0.
    config = load_config("config.yaml")
    ```
 
-This API reference provides comprehensive documentation for all public interfaces in VEXIS-CLI-1, enabling developers to integrate, extend, and test the system effectively.
+This API reference provides comprehensive documentation for all public interfaces in VEXIS-CLI-1.1, enabling developers to integrate, extend, and test the system effectively.
