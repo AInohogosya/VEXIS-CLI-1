@@ -1,8 +1,8 @@
-# VEXIS-CLI-1 Technical Documentation
+# VEXIS-CLI-1.1 Technical Documentation
 
 ## Overview
 
-This directory contains comprehensive technical documentation for VEXIS-CLI-1, including architecture details, troubleshooting guides, and development resources.
+This directory contains comprehensive technical documentation for VEXIS-CLI-1.1, including architecture details, troubleshooting guides, and development resources.
 
 ## Document Structure
 
@@ -12,9 +12,9 @@ This directory contains comprehensive technical documentation for VEXIS-CLI-1, i
 - **[CONFIGURATION.md](./CONFIGURATION.md)** - Configuration options and settings
 - **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
 
-### Integration Guides
+### User Guides
+- **[../DETAILED_GUIDE.md](../DETAILED_GUIDE.md)** - Comprehensive user guide with examples
 - **[OLLAMA_INTEGRATION.md](./OLLAMA_INTEGRATION.md)** - Ollama model integration details
-- **[GEMINI_INTEGRATION.md](./GEMINI_INTEGRATION.md)** - Google Gemini integration
 - **[ERROR_HANDLING.md](./ERROR_HANDLING.md)** - Comprehensive error handling guide
 
 ### Development Resources
@@ -30,9 +30,10 @@ This directory contains comprehensive technical documentation for VEXIS-CLI-1, i
 ## Quick Navigation
 
 ### For Users
-1. Start with [Configuration](./CONFIGURATION.md) for setup
-2. Check [Troubleshooting](./TROUBLESHOOTING.md) for issues
-3. Review [Error Handling](./ERROR_HANDLING.md) for error guidance
+1. Start with the [Detailed User Guide](../DETAILED_GUIDE.md) for complete setup
+2. Check [Configuration](./CONFIGURATION.md) for advanced settings
+3. Review [Troubleshooting](./TROUBLESHOOTING.md) for issues
+4. Consult [Error Handling](./ERROR_HANDLING.md) for error guidance
 
 ### For Developers
 1. Read [Architecture](./ARCHITECTURE.md) for system understanding

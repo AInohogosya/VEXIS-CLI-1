@@ -21,9 +21,9 @@ try:
 except ImportError:
     raise ImportError("PIL (Pillow) is required for Google API provider")
 
-from .vision_api_client import APIRequest, APIResponse, BaseAPIProvider
-from ..utils.exceptions import APIError, ValidationError
-from ..utils.logger import get_logger
+from ..vision_api_client import APIRequest, APIResponse, BaseAPIProvider
+from ai_agent.utils.exceptions import APIError, ValidationError
+from ai_agent.utils.logger import get_logger
 
 
 class GoogleProvider(BaseAPIProvider):

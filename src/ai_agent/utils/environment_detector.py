@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Environment Detection and Adaptive Execution System for VEXIS-CLI-1
+Environment Detection and Adaptive Execution System for VEXIS-CLI-1.1
 Gathers system data and adapts execution based on the environment
 """
 

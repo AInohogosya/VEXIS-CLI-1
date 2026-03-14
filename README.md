@@ -1,181 +1,153 @@
-<div align="center">
-
-# VEXIS-CLI-1
-
-</div>
 
 <div align="center">
 
-![VEXIS CLI Logo](https://img.shields.io/badge/VEXIS-CLI%201.0.0-blue?style=for-the-badge)
-![Python Version](https://img.shields.io/badge/python-3.8%2B-blue?style=for-the-badge&logo=python)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
-![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=for-the-badge)
+![Betelgeuse](image.png)
 
-**AI-Powered Command Line Interface for Intelligent Automation**
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Experimental-orange?style=flat-square)]()
 
-[VEXIS-CLI-1](https://github.com/AInohogosya-team/VEXIS-CLI-1) is an AI agent derived from VEXIS-1.1 that performs tasks through command execution. It leverages large language models to intelligently interpret natural language commands and execute them through terminal operations, enabling automated workflow management and system administration.
-
-[Quick Start](#quick-start) • [Documentation](#documentation) • [Models](#supported-ai-models) • [Configuration](#configuration) • [Contributing](#contributing)
+**AI agent that automates command-line tasks**
 
 </div>
 
-## Key Features
+---
 
-### AI-Powered Intelligence
-- **Natural Language Processing**: Execute commands using plain English descriptions
-- **Context-Aware Execution**: Understands your workflow and adapts to your needs
-- **Multi-Model Support**: Compatible with 80+ AI models from 12 major providers
-- **Smart Verification**: Automatic task completion validation with confidence scoring
+## About
 
-### Advanced Automation
-- **Two-Phase Engine**: Planning and execution phases for reliable task completion
-- **Cross-Platform Compatibility**: Works seamlessly on macOS, Linux, and Windows
-- **GUI Automation**: Integrate terminal commands with graphical interface interactions
-- **Screenshot Integration**: Visual context capture for enhanced understanding
+**VEXIS-CLI-1.1** is an AI command-line agent that processes natural language instructions to execute terminal operations. Supports multiple AI providers including Ollama, Google Gemini, OpenAI, Anthropic, xAI, Meta, Mistral AI, Microsoft Azure, Amazon Bedrock, Cohere, DeepSeek, Groq, and Together AI.
 
-### Developer Experience
-- **Rich Terminal UI**: Beautiful, informative output with progress indicators
-- **Flexible Configuration**: YAML-based settings with environment variable overrides
-- **Extensible Architecture**: Plugin-ready design for custom integrations
-- **Comprehensive Logging**: Structured logging for debugging and monitoring
+### AI Providers
 
-## 🚀 Quick Start
+**Local/Privacy-First:**
+- **Ollama**: You can use Ollama's local models or cloud models. It is recommended to sign in to Ollama in advance.
 
-### Prerequisites
+**Cloud Providers (API Key Required):**
+- **Groq**: Fast inference with Llama/Mixtral models
+- **Google Gemini**: Enterprise-grade cloud models  
+- **OpenAI**: GPT models with advanced capabilities
+- **Anthropic**: Claude models with strong reasoning
+- **xAI**: Grok models for real-time knowledge
+- **Meta**: Llama models via Meta API
+- **Mistral AI**: Advanced multilingual models
+- **Microsoft Azure**: GPT models via Azure
+- **Amazon Bedrock**: Titan/Nova models via AWS
+- **Cohere**: Command models for enterprise
+- **DeepSeek**: Advanced reasoning models
+- **Together AI**: Open-source model hosting
 
-- Python 3.8 or higher
-- [Ollama](https://ollama.com/) installed and running (for local AI models)
-- Git (for cloning the repository)
+> **🎯 Now Functional**: All 13 providers are now integrated and working through the unified API system!
 
-### Installation
+> **💡 AInohogosya-Team Recommendations**: For best performance and reliability, we recommend **Groq** (fast inference), **Google Gemini** (enterprise-grade), **OpenAI** (advanced capabilities), and **Ollama** (privacy-first local).
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git
-   cd VEXIS-CLI-1
-   ```
+> **⚠️ Provider Compatibility**: While we support 13+ AI providers, using other providers beyond our recommendations may occasionally encounter errors or bugs due to API differences or model-specific behaviors.
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+> **⚠️ Important Note**: Some Ollama models may experience compatibility issues or errors. If you encounter problems with specific models, try alternatives like `gemma3:4b`, `qwen2.5:3b`, or `deepseek-r1:7b`.
 
-3. **Set up Ollama** (optional, for local models)
-   ```bash
-   # Install Ollama
-   curl -fsSL https://ollama.com/install.sh | sh
-   
-   # Pull a recommended model
-   ollama pull llama3.2:latest
-   ```
+> **Note**: Experimental project. Use with curiosity!
 
-4. **Run VEXIS-CLI**
-   ```bash
-   python run.py
-   ```
+---
 
-### Your First Command
+## Features
+
+- Natural language to CLI conversion
+- Command execution with intelligent error handling
+- File operations and workflow automation
+- Enhanced Ollama error handling with user-friendly guidance
+- One-liner execution: `python3 run.py "do something"`
+
+---
+
+## Installation
 
 ```bash
-# Start the interactive interface
-python run.py
-
-# Or use direct commands
-vexis-cli "List all Python files in the current directory"
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
+cd VEXIS-CLI-1.1
+python3 run.py "list files"  # Dependencies handled automatically
 ```
 
-## Supported AI Models
+### Requirements
+- Python 3.9+
+- API keys for cloud providers (Ollama works locally)
+- Optional: Ollama account for cloud models (`ollama signin`)
 
-VEXIS-CLI-1 supports **150+ models** from **20 major providers** through Ollama:
+> 📖 **Need detailed guidance?** Check out our [Detailed User Guide](./DETAILED_GUIDE.md) for comprehensive setup instructions.
 
-### Core Providers
-- **Meta**: Llama 3.1/3.2 series (8B, 70B, 1B, 3B variants)
-- **Google**: Gemma 2/3 series (1B-27B parameters, multimodal capabilities)
-- **DeepSeek**: R1/V3/Coder series (8B-671B, reasoning and coding specialists)
-- **Microsoft**: Phi-3/4 series (3.8B-14B, efficient small models)
-- **Mistral**: Mistral/Large/Ministral series (7B-675B, European open-source leader)
+---
 
-### Advanced Providers
-- **Alibaba (Qwen)**: Qwen 2.5/3 series (0.5B-235B, multilingual with 128K+ context)
-- **IBM**: Granite/Code series (350M-34B, enterprise-grade models)
-- **BigCode**: StarCoder 2 series (3B-15B, specialized for code generation)
-- **Cohere**: Command R series (7B-35B, retrieval-augmented generation)
-- **01.AI**: Yi series (1.5B-34B, bilingual models)
+## Usage
 
-### Specialized Models
-- **Vision-Language**: LLaVA, Moondream, Qwen3-VL (7B-235B)
-- **Coding**: DeepSeek Coder, Qwen Coder, Granite Code, StarCoder 2
-- **Agentic**: Hermes 3, Reflection, Devstral Small 2 (3B-405B)
-- **Cloud-Only**: GPT-OSS, Gemini 3, GLM-5, MiniMax, Kimi (20B-744B)
+### Provider Selection
 
-### Cloud & Local Models
-- **Local Models**: Run entirely on your machine with Ollama
-- **Cloud Models**: Access high-performance models via API
-- **Hybrid Mode**: Seamlessly switch between local and cloud models
+When you run VEXIS-CLI, you'll first see a provider selection screen where you can choose your preferred AI provider:
 
-<details>
-<summary>Complete Model List</summary>
+![Provider Selection Screen](Choose_model.png)
 
-**Popular Local Models:**
-- `llama3.2:latest` (3B) - Balanced performance with 128K context
-- `qwen2.5:7b` - Multilingual capabilities with 128K context
-- `mistral:7b` - Fast and efficient with 32K context
-- `deepseek-r1:8b` - Advanced reasoning with 128K context
-- `gemma2:9b` - High-performing with 8K context
-- `phi3:mini` - Efficient small model with 4K context
+### Commands
 
-**High-Performance Cloud Models:**
-- `deepseek-v3:671b` - State-of-the-art MoE with 160K context
-- `qwen3:235b` - Advanced MoE with 256K context
-- `mistral-large-3:675b-cloud` - Multimodal enterprise model
-- `gpt-oss:120b-cloud` - Frontier performance
-- `gemini-3-flash-preview:cloud` - Built for speed
-
-</details>
-
-## Usage Examples
-
-### Quick Start
 ```bash
-# Start the interactive interface
-python run.py
+# Basic commands
+python3 run.py "list files in current directory"
+python3 run.py "create hello.txt with content 'Hello World'"
+python3 run.py "show system information"
 
-# Or use direct commands
-vexis-cli "List all Python files in the current directory"
+# Options
+python3 run.py "instruction" --debug     # Verbose logging
+python3 run.py "instruction" --no-prompt # Skip provider selection
 ```
 
-For detailed usage examples, see our [Detailed Guide](DETAILED_GUIDE.md).
+---
 
-## Documentation
+## Configuration
 
-- [📖 Detailed Guide](DETAILED_GUIDE.md) - Comprehensive usage examples and advanced features
-- [🔧 Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
-- [📚 API Reference](docs/API_REFERENCE.md)
-- [🏗️ Architecture](docs/ARCHITECTURE.md)
-- [⚙️ Configuration](docs/CONFIGURATION.md)
-- [🤝 Contributing](docs/CONTRIBUTING.md)
+Edit `config.yaml`:
 
-## Community
+```yaml
+api:
+  preferred_provider: "ollama"  # "ollama", "groq", "google", "openai", "anthropic", "xai", "meta", "mistral", "azure", "amazon", "cohere", "deepseek", "together"
+  local_endpoint: "http://localhost:11434"
+  local_model: "gemma3:4b"  # Recommended stable model
+  timeout: 120
+  max_retries: 3
+```
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/AInohogosya-team/VEXIS-CLI-1/issues)
-- **Discussions**: [Join the community discussion](https://github.com/AInohogosya-team/VEXIS-CLI-1/discussions)
+**Model Recommendations:**
+- **Stable**: `gemma3:4b`, `qwen2.5:3b`, `deepseek-r1:7b`
+- **Latest**: `gemini-3.1-pro`, `gpt-5.4`, `claude-opus-4.6`
+- **Cloud**: Google Gemini 3.1 Pro (most reliable)
 
-## License
+> 📖 **For detailed configuration options**, see our [Configuration Guide](./docs/CONFIGURATION.md) and [Detailed User Guide](./DETAILED_GUIDE.md).
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
 
-## Support
+## Error Handling
 
-- 📧 Email: AInohogosya@proton.me
-- X: [AInohogosya](https://twitter.com/AInohogosya)
-- Home Page: https://ainohogosya.github.io/home-page/
+Comprehensive Ollama error guidance:
+- **Permission Errors**: macOS Full Disk Access, Linux permissions, Windows admin
+- **Model Errors**: Available models list and alternative suggestions
+- **Connection Issues**: Service restart and port checking
+- **Installation Problems**: Platform-specific instructions
+
+> 📖 **Need help with issues?** Check our [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) and [Detailed User Guide](./DETAILED_GUIDE.md#troubleshooting).
+
+---
+
+## Architecture
+
+Two-phase execution engine:
+1. **Command Planning**: Natural language analysis
+2. **Terminal Execution**: Implementation with error recovery
+
+### Core Components
+- `TwoPhaseEngine` - Orchestration
+- `ModelRunner` - AI provider abstraction
+- `CommandParser` - Natural language processing
+- `TaskVerifier` - Validation and error handling
 
 ---
 
 <div align="center">
 
-[Back to top](#vexis-cli-1)
-
-Made with ❤️ by the [AInohogosya-team](https://github.com/AInohogosya-team)
+**VEXIS-CLI-1.1 - Intelligent command-line automation**
 
 </div>

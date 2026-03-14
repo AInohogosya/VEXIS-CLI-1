@@ -13,6 +13,10 @@ except ImportError:
 
 def select_ollama_model() -> Optional[str]:
     """Interactive hierarchical menu for selecting Ollama models using arrow keys"""
+    from .settings_manager import get_settings_manager
+    
+    settings_manager = get_settings_manager()
+    
     # Use curses-based hierarchical selector
     try:
         selector = get_curses_hierarchical_menu()
@@ -20,15 +24,19 @@ def select_ollama_model() -> Optional[str]:
         selected_model = selector.show()
         
         if selected_model is None:
-            return None  # Force selection
+            return settings_manager.get_ollama_model()
         
+        # Save selection
+        settings_manager.set_ollama_model(selected_model)
         success_message(f"Selected model: {selected_model}")
         return selected_model
         
     except ImportError as e:
         error_message(f"Curses menu not available: {e}")
-        return None  # No fallback
+        return None
     except Exception as e:
         error_message(f"Selection failed: {e}")
-        # No fallback
-        return None
+        # Fallback: show current model
+        current_model = settings_manager.get_ollama_model()
+        warning_message(f"Using current model: {current_model}")
+        return current_model

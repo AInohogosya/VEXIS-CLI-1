@@ -1,14 +1,14 @@
 """
 Model Runner for CLI AI Agent System
-Simplified: Ollama Cloud Models Only
+Multi-Provider Support: 13+ AI providers available
 """
 
 import time
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 from enum import Enum
 
-from .vision_api_client import VisionAPIClient, APIRequest, APIProvider
+from .multi_provider_vision_client import MultiProviderVisionAPIClient, APIRequest, APIProvider
 from ..utils.exceptions import ValidationError
 from ..utils.logger import get_logger
 from ..utils.config import load_config
@@ -69,15 +69,12 @@ Example:
 - "open safari" -> 1. Open safari browser
 - "create python project" -> 1. Create project folder, 2. Navigate to folder, 3. Initialize git
 
-CRITICAL: Output ONLY the numbered list. No explanations, no intro text, no markdown formatting.
-
 Output format:
 1. [First CLI step]
 2. [Second CLI step]
-3. [Third CLI step]
 ...
 
-Each step should be a clear, actionable CLI-oriented task description.""",
+Only the numbered list, no extra text.""",
 
             TaskType.COMMAND_PARSING.value: """Convert this task into a single CLI command.
 
@@ -97,31 +94,17 @@ Available commands: Any CLI command, END (stop), REGENERATE_STEP (retry)
 
 CRITICAL: Do NOT use markdown formatting, code blocks, or any special characters. Output plain text only.
 
-CRITICAL COMMAND OUTPUT REQUIREMENTS:
-- Output the CLI command WITHOUT any enclosing characters
-- NO quotes (single or double) around the command
-- NO brackets, parentheses, or other special characters
-- NO markdown formatting like ```bash or ```
-- The command should be plain, executable text exactly as it would appear in a terminal
-- This is EXTREMELY important - the command must be directly executable without any modification
-
 Output format (4 lines):
 Reasoning: [Why this command, considering your history]
 Target: [What this command targets]
-[The CLI command - PLAIN TEXT, NO enclosing characters, NO quotes, NO brackets, NO markdown]
+[The CLI command - PLAIN TEXT, no markdown or code blocks]
 Terminal Log: [History will show after execution]
 
-Examples of CORRECT command output:
-- open -a Safari
-- ls -la
-- cd /Users/username
-- python script.py
-
-Examples of INCORRECT command output:
-- "open -a Safari"  (wrong - has quotes)
-- ```open -a Safari```  (wrong - has markdown)
-- [open -a Safari]  (wrong - has brackets)
-- 'open -a Safari'  (wrong - has single quotes)
+Example:
+Reasoning: User wants to open safari, no previous actions needed
+Target: Safari browser
+open -a Safari
+Terminal Log: [Will display terminal after execution]
 
 END""",
 
@@ -142,45 +125,24 @@ class ModelRunner:
 
     # Valid Ollama model names
     DEFAULT_OLLAMA_MODEL = "llama3.2:latest"
-    DEFAULT_GOOGLE_MODEL = "gemini-2.0-flash-exp"
+    DEFAULT_GOOGLE_MODEL = "gemini-3.1-pro"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, auto_install_sdks: bool = False):
         self.config = config or load_config().api.__dict__
-        self.logger = get_logger("model_runner")
-
-        # Initialize components
-        self.vision_client = VisionAPIClient(self.config)
-        self.prompt_template = PromptTemplate()
+        self.logger = get_logger(__name__)
         
-        # Don't validate here - will be validated when config is updated
+        # Initialize multi-provider vision client with SDK installation support
+        self.vision_client = MultiProviderVisionAPIClient(self.config, auto_install_sdks=auto_install_sdks)
+        self.prompt_template = PromptTemplate()
 
         self.logger.info(
-            "Model runner initialized - session specific",
-            preferred_provider=self.config.get("preferred_provider", "unknown"),
+            "Model runner initialized",
+            preferred_provider=self.config.get("preferred_provider"),
+            default_model=self.DEFAULT_OLLAMA_MODEL,
         )
 
-    def _validate_model_configuration(self):
-        """Validate that a model is properly configured for this session"""
-        preferred_provider = self.config.get("preferred_provider")
-        
-        if not preferred_provider:
-            raise ValueError("No provider selected - user must select a provider first")
-        
-        if preferred_provider == "google":
-            google_model = self.config.get("google_model")
-            google_api_key = self.config.get("google_api_key")
-            if not google_model:
-                raise ValueError("No Google model selected - user must select a model first")
-            if not google_api_key:
-                raise ValueError("No Google API key provided - user must provide API key first")
-        elif preferred_provider == "ollama":
-            ollama_model = self.config.get("local_model")
-            if not ollama_model:
-                raise ValueError("No Ollama model selected - user must select a model first")
-        else:
-            raise ValueError(f"Invalid provider: {preferred_provider}")
-
     def run_model(self, request: ModelRequest) -> ModelResponse:
+        """Run AI model for CLI Architecture"""
         start_time = time.time()
 
         try:
@@ -190,23 +152,14 @@ class ModelRunner:
             # Format prompt
             prompt = self._format_prompt(request)
 
-            # Determine provider and model - use only session-selected values
-            preferred_provider = self.config.get("preferred_provider")
+            # Use configured model directly - no provider preference logic
+            model_name = self.config.get("local_model")
+            if not model_name:
+                raise ValidationError("No model configured. Please select a model first.")
             
-            if preferred_provider == "google":
-                provider_enum = APIProvider.GOOGLE
-                model_name = self.config.get("google_model")
-                api_key = self.config.get("google_api_key")
-                if not model_name or not api_key:
-                    raise ValueError("Google model and API key must be selected for this session")
-            elif preferred_provider == "ollama":
-                provider_enum = APIProvider.OLLAMA
-                model_name = self.config.get("local_model")
-                if not model_name:
-                    raise ValueError("Ollama model must be selected for this session")
-            else:
-                raise ValueError(f"Invalid provider: {preferred_provider}")
-
+            # Determine provider from model configuration
+            provider_name = "ollama"  # Default to ollama for local models
+            
             # Create API request
             api_request = APIRequest(
                 prompt=prompt,
@@ -215,11 +168,11 @@ class ModelRunner:
                 max_tokens=request.max_tokens,
                 temperature=request.temperature,
                 model=model_name,
-                provider=provider_enum,
+                provider=provider_name,
             )
 
             # Make API call
-            api_response = self.vision_client.analyze_image(api_request)
+            api_response = self.vision_client.generate_response(api_request)
 
             # Create model response
             model_response = ModelResponse(
@@ -359,6 +312,14 @@ class ModelRunner:
         )
 
         return self.run_model(request)
+    
+    def install_missing_sdks(self, providers: Optional[List[str]] = None, interactive: bool = True) -> Dict[str, bool]:
+        """Install missing SDKs for specified providers"""
+        return self.vision_client.install_missing_sdks(providers, interactive)
+    
+    def show_sdk_status(self, providers: Optional[List[str]] = None):
+        """Show SDK installation status"""
+        self.vision_client.show_sdk_status(providers)
 
 
 def get_model_runner() -> ModelRunner:

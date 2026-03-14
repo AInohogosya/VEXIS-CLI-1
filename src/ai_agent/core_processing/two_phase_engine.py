@@ -15,9 +15,7 @@ from ..utils.logger import get_logger
 from .command_parser import ParsedCommand, CommandType
 from .terminal_history import TerminalHistory, get_terminal_history
 from .command_output import get_command_formatter, format_command_output
-from .task_completion_verifier import get_task_completion_verifier, TaskVerification, VerificationResult
 from .task_robustness_manager import get_task_robustness_manager, TaskRobustnessManager, RobustnessConfig, TaskCompletionStatus
-from .enhanced_task_verifier import get_enhanced_task_verifier, EnhancedVerificationResult
 
 
 @dataclass
@@ -83,10 +81,9 @@ class TwoPhaseEngine:
         self.command_formatter = get_command_formatter()
         
         # Initialize components
-        self.model_runner = ModelRunner()
+        auto_install_sdks = self.config.pop('auto_install_sdks', False)
+        self.model_runner = ModelRunner(auto_install_sdks=auto_install_sdks)
         
-        # Initialize task completion verifier
-        self.task_verifier = get_task_completion_verifier(self.config)
         
         # Initialize task robustness manager
         robustness_config = RobustnessConfig(
@@ -100,8 +97,6 @@ class TwoPhaseEngine:
         )
         self.robustness_manager = get_task_robustness_manager(robustness_config)
         
-        # Initialize enhanced task verifier
-        self.enhanced_verifier = get_enhanced_task_verifier(self.config)
         
         # Execution settings
         self.max_task_retries = self.config.get("max_task_retries", 3)
@@ -109,7 +104,7 @@ class TwoPhaseEngine:
         self.command_timeout = self.config.get("command_timeout", 30)
         self.task_timeout = self.config.get("task_timeout", 300)  # 5 minutes per task
         
-        self.logger.info("Two-phase execution engine initialized with terminal history system, command output formatter, task robustness manager, and enhanced task verifier")
+        self.logger.info("Two-phase execution engine initialized with terminal history system, command output formatter, and task robustness manager")
     
     def execute_instruction(self, instruction: str) -> ExecutionContext:
         """Execute user instruction using two-phase approach"""
@@ -128,9 +123,6 @@ class TwoPhaseEngine:
             # Phase 2: Sequential Task Execution
             context = self._execute_phase_2(context)
             
-            # Phase 3: Task Completion Verification
-            context = self._execute_phase_3_verification(context, instruction)
-            
             # Mark as completed
             context.phase = ExecutionPhase.COMPLETED
             context.end_time = time.time()
@@ -139,7 +131,7 @@ class TwoPhaseEngine:
             self.terminal_history.end_session()
             
             self.logger.info(
-                "Two-phase execution completed successfully with verification",
+                "Two-phase execution completed successfully",
                 total_tasks=len(context.task_list.tasks) if context.task_list else 0,
                 executed_commands=len(context.executed_commands),
                 duration=context.end_time - context.start_time
@@ -197,6 +189,8 @@ class TwoPhaseEngine:
         except Exception as e:
             self.logger.error(f"Phase 1 failed: {e}")
             raise ExecutionError(f"Task generation phase failed: {e}")
+        
+        return context
     
     def _execute_phase_2(self, context: ExecutionContext) -> ExecutionContext:
         """Phase 2: Sequential Task Execution with context preservation"""
@@ -240,287 +234,6 @@ class TwoPhaseEngine:
         except Exception as e:
             self.logger.error(f"Phase 2 failed: {e}")
             raise ExecutionError(f"Task execution phase failed: {e}")
-    
-    def _execute_phase_3_verification(self, context: ExecutionContext, instruction: str) -> ExecutionContext:
-        """Phase 3: Enhanced Task Completion Verification using multiple verification methods"""
-        self.logger.info("Starting Phase 3: Enhanced Task Completion Verification")
-        
-        try:
-            # Get robustness summary from context if available
-            task_robustness_summary = context.metadata.get("task_robustness_summary", {})
-            
-            # Perform enhanced verification combining traditional and robustness methods
-            enhanced_verification = self.enhanced_verifier.verify_task_completion_enhanced(
-                original_instruction=instruction,
-                session_id=self.terminal_history.session_id,
-                task_robustness_summary=task_robustness_summary
-            )
-            
-            # Store enhanced verification result in context
-            context.metadata["enhanced_verification"] = {
-                "final_decision": enhanced_verification.final_decision.value,
-                "combined_confidence": enhanced_verification.combined_confidence,
-                "detailed_reasoning": enhanced_verification.detailed_reasoning,
-                "robustness_status": enhanced_verification.robustness_status.value,
-                "should_continue_execution": enhanced_verification.should_continue_execution,
-                "additional_steps_needed": enhanced_verification.additional_steps_needed,
-                "traditional_result": enhanced_verification.original_verification.result.value,
-                "traditional_confidence": enhanced_verification.original_verification.confidence
-            }
-            
-            self.logger.info(
-                "Enhanced task verification completed",
-                final_decision=enhanced_verification.final_decision.value,
-                combined_confidence=enhanced_verification.combined_confidence,
-                should_continue=enhanced_verification.should_continue_execution,
-                robustness_status=enhanced_verification.robustness_status.value
-            )
-            
-            # Handle enhanced verification results
-            if enhanced_verification.final_decision == VerificationResult.ERROR:
-                raise ExecutionError(f"Enhanced task verification failed: {enhanced_verification.detailed_reasoning}")
-            
-            elif enhanced_verification.final_decision == VerificationResult.INCOMPLETE:
-                self.logger.warning(f"Task verification incomplete: {enhanced_verification.detailed_reasoning}")
-                if enhanced_verification.should_continue_execution:
-                    # Continue execution with additional steps
-                    return self._handle_enhanced_verification_continuation(context, instruction, enhanced_verification)
-                else:
-                    # Continue but note the issues
-                    self.logger.warning("Continuing despite incomplete verification")
-            
-            elif enhanced_verification.final_decision == VerificationResult.UNCERTAIN:
-                self.logger.warning(f"Task verification uncertain: {enhanced_verification.detailed_reasoning}")
-                if enhanced_verification.should_continue_execution:
-                    # Continue execution to resolve uncertainty
-                    return self._handle_enhanced_verification_continuation(context, instruction, enhanced_verification)
-                else:
-                    # Continue with uncertainty but note it
-                    self.logger.warning("Continuing despite uncertain verification")
-            
-            elif enhanced_verification.final_decision == VerificationResult.COMPLETED:
-                self.logger.info(f"Task verification completed successfully: {enhanced_verification.detailed_reasoning}")
-            
-            return context
-            
-        except Exception as e:
-            self.logger.error(f"Phase 3 failed: {e}")
-            # Continue execution even if verification fails, but log the error
-            context.metadata["verification_error"] = str(e)
-            self.logger.warning("Continuing execution despite verification failure")
-            return context
-    
-    def _handle_enhanced_verification_continuation(self, context: ExecutionContext, original_instruction: str, enhanced_verification: EnhancedVerificationResult) -> ExecutionContext:
-        """Handle continuation of execution based on enhanced verification feedback"""
-        self.logger.info("Starting enhanced verification-based continuation")
-        
-        try:
-            # Create enhanced instruction based on verification feedback
-            enhanced_instruction = self._create_enhanced_continuation_instruction(
-                original_instruction, enhanced_verification, context
-            )
-            
-            # Generate additional tasks based on verification feedback
-            additional_tasks = self._generate_additional_tasks(
-                enhanced_instruction, enhanced_verification.additional_steps_needed
-            )
-            
-            if additional_tasks:
-                # Add additional tasks to the existing task list
-                if context.task_list:
-                    context.task_list.tasks.extend(additional_tasks)
-                    self.logger.info(f"Added {len(additional_tasks)} additional tasks to complete the work")
-                else:
-                    # Create new task list if none exists
-                    from .task_generator import TaskList as GeneratorTaskList
-                    context.task_list = GeneratorTaskList(
-                        tasks=additional_tasks,
-                        instruction=enhanced_instruction,
-                        generation_time=time.time()
-                    )
-                
-                # Reset current task index to start from the new tasks
-                context.current_task_index = len(context.task_list.tasks) - len(additional_tasks)
-                
-                # Store continuation metadata
-                context.metadata["enhanced_continuation"] = {
-                    "triggered_by": enhanced_verification.final_decision.value,
-                    "combined_confidence": enhanced_verification.combined_confidence,
-                    "additional_tasks_count": len(additional_tasks),
-                    "continuation_time": time.time()
-                }
-                
-                self.logger.info("Enhanced continuation setup completed",
-                                additional_tasks=len(additional_tasks),
-                                confidence=enhanced_verification.combined_confidence)
-                
-                # Continue with Phase 2 execution for the additional tasks
-                return self._execute_phase_2(context)
-            else:
-                self.logger.warning("No additional tasks generated for continuation")
-                return context
-            
-        except Exception as e:
-            self.logger.error(f"Enhanced verification continuation failed: {e}")
-            context.error = f"Enhanced continuation failed: {e}"
-            return context
-    
-    def _create_enhanced_continuation_instruction(self, original_instruction: str, enhanced_verification: EnhancedVerificationResult, context: ExecutionContext) -> str:
-        """Create enhanced instruction for continuation based on enhanced verification feedback"""
-        enhanced_parts = [original_instruction]
-        
-        # Add enhanced verification reasoning
-        if enhanced_verification.detailed_reasoning:
-            enhanced_parts.append(f"\nEnhanced verification analysis: {enhanced_verification.detailed_reasoning}")
-        
-        # Add additional steps needed
-        if enhanced_verification.additional_steps_needed:
-            enhanced_parts.append(f"\nAdditional steps needed to complete the task:")
-            for step in enhanced_verification.additional_steps_needed:
-                enhanced_parts.append(f"- {step}")
-        
-        # Add robustness status information
-        if enhanced_verification.robustness_status:
-            enhanced_parts.append(f"\nCurrent robustness status: {enhanced_verification.robustness_status.value}")
-        
-        # Add execution context
-        if context.executed_commands:
-            enhanced_parts.append(f"\nPreviously executed commands:")
-            for i, cmd in enumerate(context.executed_commands[-5:], 1):  # Last 5 commands
-                enhanced_parts.append(f"{i}. {cmd}")
-        
-        return "\n".join(enhanced_parts)
-    
-    def _generate_additional_tasks(self, enhanced_instruction: str, additional_steps: List[str]) -> List[str]:
-        """Generate additional tasks based on verification feedback"""
-        tasks = []
-        
-        # Convert additional steps to task descriptions
-        for step in additional_steps:
-            if step.strip():
-                # Convert step to a proper task description
-                task_description = f"Complete the following step: {step.strip()}"
-                tasks.append(task_description)
-        
-        # If no specific steps, add generic continuation tasks
-        if not tasks:
-            tasks = [
-                "Review and verify the current state of task completion",
-                "Complete any remaining steps to fully accomplish the original goal",
-                "Ensure all requirements of the original instruction have been met"
-            ]
-        
-        self.logger.info(f"Generated {len(tasks)} additional tasks for continuation")
-        return tasks
-    
-    def _handle_verification_regeneration(self, context: ExecutionContext, original_instruction: str, verification: TaskVerification) -> ExecutionContext:
-        """Handle task regeneration when verification indicates incomplete or uncertain completion"""
-        self.logger.info("Starting verification-based task regeneration")
-        
-        # Load configuration for max regenerations
-        from ..utils.config import load_config
-        config = load_config()
-        max_regenerations = getattr(config.verification, 'max_regenerations', 2)
-        
-        # Check for infinite loop protection
-        regeneration_count = context.metadata.get("verification_regeneration_count", 0)
-        
-        if regeneration_count >= max_regenerations:
-            self.logger.error(
-                f"Maximum verification regeneration limit reached ({max_regenerations}), stopping execution",
-                regeneration_count=regeneration_count,
-                verification_result=verification.result.value
-            )
-            context.error = f"Maximum verification regeneration limit ({max_regenerations}) exceeded"
-            return context
-        
-        # Increment regeneration counter
-        context.metadata["verification_regeneration_count"] = regeneration_count + 1
-        
-        # Log regeneration start
-        self.logger.info(
-            "Verification-based regeneration started",
-            original_instruction=original_instruction,
-            verification_result=verification.result.value,
-            verification_confidence=verification.confidence,
-            missing_steps=len(verification.missing_steps),
-            regeneration_count=regeneration_count + 1
-        )
-        
-        try:
-            # Get OS info for regeneration analysis
-            os_info = context.metadata.get("os_info", "Unknown")
-            
-            # Create enhanced instruction based on verification feedback
-            enhanced_instruction = self._create_enhanced_instruction(
-                original_instruction, verification, context
-            )
-            
-            # Generate new task list using verification feedback
-            regeneration_response = self.model_runner.generate_tasks(
-                enhanced_instruction,
-                os_info
-            )
-            
-            if not regeneration_response.success:
-                self.logger.error(f"Verification regeneration failed: {regeneration_response.error}")
-                return context
-            
-            # Parse the regenerated task list
-            regenerated_task_list = self._parse_task_list_response(regeneration_response.content, enhanced_instruction)
-            
-            # Update context with new task list
-            context.task_list = regenerated_task_list
-            context.current_task_index = 0
-            context.metadata["verification_regeneration_triggered"] = True
-            context.metadata["verification_regeneration_time"] = time.time()
-            context.metadata["verification_feedback"] = {
-                "result": verification.result.value,
-                "reasoning": verification.reasoning,
-                "missing_steps": verification.missing_steps,
-                "suggestions": verification.suggestions
-            }
-            
-            self.logger.info(
-                "Verification regeneration completed successfully",
-                new_task_count=len(regenerated_task_list.tasks),
-                regeneration_count=regeneration_count + 1
-            )
-            
-            # Restart execution with new task list
-            return self._execute_phase_2(context)
-            
-        except Exception as e:
-            self.logger.error(f"Verification regeneration failed: {e}")
-            context.error = f"Verification regeneration failed: {e}"
-            return context
-    
-    def _create_enhanced_instruction(self, original_instruction: str, verification: TaskVerification, context: ExecutionContext) -> str:
-        """Create enhanced instruction based on verification feedback"""
-        enhanced_parts = [original_instruction]
-        
-        # Add verification feedback
-        if verification.missing_steps:
-            enhanced_parts.append(f"\nMissing steps to complete:")
-            for step in verification.missing_steps:
-                enhanced_parts.append(f"- {step}")
-        
-        if verification.suggestions:
-            enhanced_parts.append(f"\nSuggestions for completion:")
-            for suggestion in verification.suggestions:
-                enhanced_parts.append(f"- {suggestion}")
-        
-        # Add verification reasoning
-        if verification.reasoning:
-            enhanced_parts.append(f"\nVerification analysis: {verification.reasoning}")
-        
-        # Add execution context
-        if context.executed_commands:
-            enhanced_parts.append(f"\nPreviously executed commands:")
-            for i, cmd in enumerate(context.executed_commands[-5:], 1):  # Last 5 commands
-                enhanced_parts.append(f"{i}. {cmd}")
-        
-        return "\n".join(enhanced_parts)
     
     def _execute_task_with_command_loop(self, context: ExecutionContext, task_description: str) -> bool:
         """Execute a single task using command generation loop with reflection and robustness management"""

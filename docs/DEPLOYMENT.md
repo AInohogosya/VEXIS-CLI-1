@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers deployment strategies, configurations, and best practices for VEXIS-CLI-1 in various environments from development to production.
+This guide covers deployment strategies, configurations, and best practices for VEXIS-CLI-1.1 in various environments from development to production.
 
 ## Deployment Architectures
 
@@ -13,7 +13,7 @@ This guide covers deployment strategies, configurations, and best practices for 
 │           Single Machine               │
 ├─────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────────┐   │
-│  │ VEXIS-CLI-1 │  │   Ollama       │   │
+│  │ VEXIS-CLI-1.1 │  │   Ollama       │   │
 │  │   Engine    │  │   Server       │   │
 │  └─────────────┘  └─────────────────┘   │
 │  ┌─────────────┐  ┌─────────────────┐   │
@@ -43,7 +43,7 @@ This guide covers deployment strategies, configurations, and best practices for 
                     └─────────────┬─────────────┘
                                  │
                     ┌─────────────┴─────────────┐
-                    │   VEXIS-CLI-1 Cluster    │
+                    │   VEXIS-CLI-1.1 Cluster    │
                     │  ┌─────────────────────┐ │
                     │  │   Application Node   │ │
                     │  └─────────────────────┘ │
@@ -108,8 +108,8 @@ ollama --version
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git
-cd VEXIS-CLI-1
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git
+cd VEXIS-CLI-1.1
 
 # 2. Create virtual environment
 python3 -m venv venv
@@ -208,7 +208,7 @@ monitoring:
 
 set -e
 
-echo "Deploying VEXIS-CLI-1 to staging..."
+echo "Deploying VEXIS-CLI-1.1 to staging..."
 
 # 1. Update code
 git pull origin main
@@ -712,7 +712,7 @@ sudo chown ec2-user:ec2-user /opt/vexis
 
 # Clone repository
 cd /opt/vexis
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.git .
+git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.1.git .
 
 # Set up environment
 echo "GOOGLE_API_KEY=${GOOGLE_API_KEY}" > .env
@@ -1453,4 +1453,4 @@ restore_backup "$1"
 echo "Recovery completed successfully"
 ```
 
-This comprehensive deployment guide provides everything needed to deploy VEXIS-CLI-1 in various environments, from development setups to production-scale deployments with proper monitoring, security, and backup strategies.
+This comprehensive deployment guide provides everything needed to deploy VEXIS-CLI-1.1 in various environments, from development setups to production-scale deployments with proper monitoring, security, and backup strategies.

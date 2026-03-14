@@ -18,6 +18,7 @@ import subprocess
 import platform
 import shutil
 from pathlib import Path
+from typing import Optional
 
 # Global constants
 VENV_DIR = "venv"
@@ -348,33 +349,49 @@ def show_help():
     print("This script automatically handles:")
     print("  • Virtual environment creation and management")
     print("  • Dependency installation")
-    print("  • Model selection (Ollama with model options or Google API)")
+    print("  • Model selection (13 AI providers with model options)")
+    print("    - Local: Ollama (privacy-focused)")
+    print("    - Cloud: OpenAI, Anthropic, Google, xAI, Meta, Groq, DeepSeek, Together, Microsoft, Mistral, Amazon, Cohere")
     print("  • Cross-platform compatibility")
     print("  • Self-bootstrapping")
     print("  • Environment detection and adaptive execution")
     print()
     print("Model Options:")
-    print("  • Ollama: Local models via Ollama with model selection")
-    print("    - Gemma 3 (1B, 4B): Lightweight and efficient models")
-    print("    - Qwen 3 (1.7B, 4B): Multilingual capabilities")
-    print("    - Gemini 3 Flash: Cloud model via Ollama (requires signin)")
-    print("    - Custom models: Enter any valid Ollama model name")
-    print("  • Google API: Official Google Gemini API (requires API key)")
-    print("    - Gemini 3 Flash: Fast and cost-effective")
-    print("    - Gemini 3.1 Pro: Advanced reasoning for complex tasks")
+    print("  🦊 Ollama: Local models (privacy-focused) - Stable")
+    print("  🌐 Google: Gemini models (enterprise-grade) - Stable")
+    print("  🤖 OpenAI: GPT models (advanced capabilities) - Beta")
+    print("  🧠 Anthropic: Claude models (strong reasoning) - Beta")
+    print("  🚀 xAI: Grok models (real-time knowledge) - Beta")
+    print("  🦙 Meta: Llama models (via Meta API) - Beta")
+    print("  ⚡ Groq: Fast inference (Llama/Mixtral) - Beta")
+    print("  🔍 DeepSeek: Advanced reasoning models - Beta")
+    print("  🤝 Together AI: Open-source model hosting - Beta")
+    print("  ☁️ Microsoft: GPT models via Azure - Beta")
+    print("  🌍 Mistral AI: Multilingual models - Beta")
+    print("  🏭 Amazon Bedrock: Titan/Nova models via AWS - Beta")
+    print("  🏢 Cohere: Command models for enterprise - Beta")
     print()
     print("Environment Commands:")
     print("  --check, -c         Run environment check and show recommendations")
     print("  --fix               Run environment check and auto-fix issues")
+    print("  --install-sdks      Install missing AI provider SDKs")
+    print("  --sdk-status        Show AI provider SDK installation status")
     print()
     print("Examples:")
     print("  python3 run.py \"Take a screenshot\"")
     print("  python3 run.py \"Open a web browser and search for AI\"")
     print("  python3 run.py --check")
+    print("  python3 run.py --install-sdks")
     print()
     print("Options:")
     print("  --help, -h          Show this help message")
     print("  --debug             Enable debug mode")
+    print("  --no-prompt         Use saved provider preference without prompting")
+    print()
+    print("SDK Management:")
+    print("  python3 manage_sdks.py status          # Show SDK status")
+    print("  python3 manage_sdks.py install         # Install all missing SDKs")
+    print("  python3 manage_sdks.py install google  # Install specific SDK")
     print()
     print("Virtual Environment:")
     print("  Automatically creates and uses './venv' directory")
@@ -515,10 +532,11 @@ def prompt_for_google_api_key():
 
 def select_google_model():
     """Prompt user to select Google model using curses arrow keys"""
-    # Settings manager import removed - model selection no longer saved
+    from ai_agent.utils.settings_manager import get_settings_manager
     from ai_agent.utils.curses_menu import get_curses_menu
     
-    current_model = "gemini-3-flash-preview"  # Default model
+    settings_manager = get_settings_manager()
+    current_model = settings_manager.get_google_model()
     
     # Use curses-based menu with arrow keys
     menu = get_curses_menu(
@@ -545,48 +563,103 @@ def select_google_model():
     if selected_model is None:
         return current_model
     
-    # Save selection removed - just return selected model
+    settings_manager.set_google_model(selected_model)
     return selected_model
 
 def show_config_summary(provider: str, model: str = None):
     """Display a clean configuration summary"""
     from ai_agent.utils.interactive_menu import Colors
+    from ai_agent.utils.settings_manager import get_settings_manager
+    
+    settings_manager = get_settings_manager()
     
     print(f"\n{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.BRIGHT_GREEN}✓ Configuration Complete{Colors.RESET}")
     print(f"{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}")
     
-    if provider == "ollama":
-        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Ollama (Local Models){Colors.RESET}")
-        # Use provided model parameter instead of settings
-        ollama_model = model if model else "llama3.2:latest"
-        print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{ollama_model}{Colors.RESET}")
-    else:
-        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Google Official API{Colors.RESET}")
-        # Use provided model parameter instead of settings
-        google_model = model if model else "gemini-3-flash-preview"
-        print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{google_model}{Colors.RESET}")
+    # Provider and model display mapping
+    provider_info = {
+        "ollama": ("Ollama (Local Models)", settings_manager.get_ollama_model()),
+        "google": ("Google Official API", model or settings_manager.get_google_model()),
+        "openai": ("OpenAI Official API", model or settings_manager.get_openai_model()),
+        "anthropic": ("Anthropic Official API", model or settings_manager.get_anthropic_model()),
+        "xai": ("xAI Official API", model or settings_manager.get_xai_model()),
+        "meta": ("Meta Official API", model or settings_manager.get_meta_model()),
+        "groq": ("Groq Official API", model or settings_manager.get_groq_model()),
+        "deepseek": ("DeepSeek Official API", model or settings_manager.get_deepseek_model()),
+        "together": ("Together AI Official API", model or settings_manager.get_together_model()),
+        "microsoft": ("Microsoft Azure API", model or settings_manager.get_microsoft_model()),
+        "mistral": ("Mistral Official API", model or settings_manager.get_mistral_model()),
+        "amazon": ("Amazon Bedrock API", model or settings_manager.get_amazon_model()),
+        "cohere": ("Cohere Official API", model or settings_manager.get_cohere_model())
+    }
     
+    if provider in provider_info:
+        provider_name, model_name = provider_info[provider]
+        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}{provider_name}{Colors.RESET}")
+        
+        # Format model name for better display
+        if model_name:
+            display_model = format_model_display_name(provider, model_name)
+            print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{display_model}{Colors.RESET}")
+    else:
+        print(f"{Colors.WHITE}  Provider: {Colors.BRIGHT_YELLOW}Unknown Provider{Colors.RESET}")
+        print(f"{Colors.WHITE}  Model:    {Colors.BRIGHT_YELLOW}{model or 'Unknown'}{Colors.RESET}")
     
     print(f"{Colors.BOLD}{Colors.BRIGHT_CYAN}{'─' * 50}{Colors.RESET}\n")
 
+def format_model_display_name(provider: str, model: str) -> str:
+    """Format model names for better display"""
+    model_display_map = {
+        "google": {
+            "gemini-2.0-flash-exp": "Gemini 2.0 Flash",
+            "gemini-3-flash-preview": "Gemini 3 Flash",
+            "gemini-1.5-pro": "Gemini 1.5 Pro",
+            "gemini-1.5-flash": "Gemini 1.5 Flash"
+        },
+        "openai": {
+            "gpt-4o": "GPT-4o",
+            "gpt-4o-mini": "GPT-4o Mini",
+            "gpt-4-turbo": "GPT-4 Turbo",
+            "gpt-3.5-turbo": "GPT-3.5 Turbo"
+        },
+        "anthropic": {
+            "claude-3-5-sonnet-20241022": "Claude 3.5 Sonnet",
+            "claude-3-opus-20240229": "Claude 3 Opus",
+            "claude-3-sonnet-20240229": "Claude 3 Sonnet",
+            "claude-3-haiku-20240307": "Claude 3 Haiku"
+        }
+    }
+    
+    if provider in model_display_map and model in model_display_map[provider]:
+        return model_display_map[provider][model]
+    
+    return model
+
 def configure_google_provider():
     """Configure Google provider with API key and model selection"""
-    # Settings manager import removed - only API key handling needed
+    from ai_agent.utils.settings_manager import get_settings_manager
     from ai_agent.utils.interactive_menu import Colors
     
-    # Simple API key prompt - no saving
-    api_key = input(f"\n{Colors.CYAN}Enter Google API key: {Colors.RESET}").strip()
-    if not api_key:
-        print(f"{Colors.RED}API key is required for Google provider{Colors.RESET}")
-        return None, None
+    settings_manager = get_settings_manager()
+    
+    # Check if API key already exists
+    if not settings_manager.has_google_api_key():
+        # Prompt for API key
+        result = prompt_for_google_api_key()
+        if result is None:
+            return None, None
+        
+        api_key, should_save = result
+        settings_manager.set_google_api_key(api_key, should_save)
+    
     
     # Select model
     model = select_google_model()
     if model is None:
-        model = "gemini-3-flash-preview"  # Default
+        model = settings_manager.get_google_model()
     
-    # Return provider and model (no saving)
+    settings_manager.set_preferred_provider("google")
     return "google", model
 
 def ensure_ollama_model_available(model_name: str) -> bool:
@@ -737,10 +810,13 @@ def ensure_ollama_model_available(model_name: str) -> bool:
 
 def configure_ollama_provider():
     """Configure Ollama provider with model selection"""
+    from ai_agent.utils.settings_manager import get_settings_manager
     from ai_agent.utils.ollama_model_selector import select_ollama_model
     from ai_agent.utils.interactive_menu import Colors, warning_message, info_message
     from ai_agent.utils.ollama_error_handler import handle_ollama_error
-        
+    
+    settings_manager = get_settings_manager()
+    
     # Check Ollama with version-aware fallback
     try:
         login_ok, status = check_ollama_login_with_fallback()
@@ -775,23 +851,32 @@ def configure_ollama_provider():
         return None
     
     if model is None:
-        # User cancelled selection - return None to force restart
-        return None
+        # User cancelled or selection failed - show current model and continue
+        current_model = settings_manager.get_ollama_model()
+        warning_message(f"Using current model: {current_model}")
+        model = current_model
+    else:
+        # Successfully selected new model
+        from ai_agent.utils.interactive_menu import success_message
+        success_message(f"Selected Ollama model: {model}")
     
     # Ensure the model is pulled locally
     if not ensure_ollama_model_available(model):
         info_message(f"Failed to pull Ollama model: {model}")
         return None
     
-    # Return provider and save the selected model
-    return "ollama", model
+    # Don't automatically set preferred provider - let user choose explicitly
+    return "ollama"
 
 def select_model_provider():
     """Main configuration screen for model provider selection using curses arrow keys"""
-    # Settings manager import removed - provider selection no longer saved
+    from ai_agent.utils.settings_manager import get_settings_manager
     from ai_agent.utils.curses_menu import get_curses_menu
     
-    # Use curses-based menu with arrow keys - always show selection
+    settings_manager = get_settings_manager()
+    current_provider = settings_manager.get_preferred_provider()
+    
+    # Use curses-based menu with arrow keys
     menu = get_curses_menu(
         "🔧 Select AI Provider",
         "Choose how you want to run AI models:"
@@ -811,12 +896,94 @@ def select_model_provider():
         "🌐"
     )
     
+    menu.add_item(
+        "OpenAI (Beta)",
+        "Use OpenAI's GPT models • Requires API key",
+        "openai",
+        "🤖"
+    )
+    
+    menu.add_item(
+        "Anthropic (Beta)",
+        "Use Anthropic's Claude models • Requires API key",
+        "anthropic",
+        "🧠"
+    )
+    
+    menu.add_item(
+        "xAI/Grok (Beta)",
+        "Use xAI's Grok models • Requires API key",
+        "xai",
+        "🚀"
+    )
+    
+    menu.add_item(
+        "Meta/Llama (Beta)",
+        "Use Meta's Llama models • Requires API key",
+        "meta",
+        "🦙"
+    )
+    
+    menu.add_item(
+        "Groq (Beta)",
+        "Use Groq's fast inference • Requires API key",
+        "groq",
+        "⚡"
+    )
+    
+    menu.add_item(
+        "DeepSeek (Beta)",
+        "Use DeepSeek's reasoning models • Requires API key",
+        "deepseek",
+        "🔍"
+    )
+    
+    menu.add_item(
+        "Together AI (Beta)",
+        "Use Together AI's open-source models • Requires API key",
+        "together",
+        "🤝"
+    )
+    
+    menu.add_item(
+        "Microsoft Azure (Beta)",
+        "Use Azure's GPT models • Requires API key",
+        "microsoft",
+        "☁️"
+    )
+    
+    menu.add_item(
+        "Mistral AI (Beta)",
+        "Use Mistral's multilingual models • Requires API key",
+        "mistral",
+        "🌍"
+    )
+    
+    menu.add_item(
+        "Amazon Bedrock (Beta)",
+        "Use AWS Bedrock models • Requires API key",
+        "amazon",
+        "🏭"
+    )
+    
+    menu.add_item(
+        "Cohere (Beta)",
+        "Use Cohere's enterprise models • Requires API key",
+        "cohere",
+        "🏢"
+    )
+    
     selected_provider = menu.show()
     
     if selected_provider is None:
-        # User cancelled - exit to force selection
-        print("Provider selection cancelled. Please select a provider to continue.")
-        sys.exit(1)
+        # User cancelled - use current settings
+        if current_provider == "google":
+            model = settings_manager.get_google_model()
+            show_config_summary(current_provider, model)
+        else:
+            ollama_model = settings_manager.get_ollama_model()
+            show_config_summary(current_provider, ollama_model)
+        return current_provider
     
     
     # Handle provider selection
@@ -825,11 +992,9 @@ def select_model_provider():
         if result is None:
             # Failed - retry configuration
             return select_model_provider()
-        
-        # result is now a tuple: (provider, model)
-        provider, model = result
-        show_config_summary(provider, model)
-        return provider, model
+        ollama_model = settings_manager.get_ollama_model()
+        show_config_summary("ollama", ollama_model)
+        return "ollama"
         
     elif selected_provider == "google":
         provider, model = configure_google_provider()
@@ -837,7 +1002,152 @@ def select_model_provider():
             # User cancelled API key entry - retry
             return select_model_provider()
         show_config_summary(provider, model)
-        return provider, model
+        return "google"
+        
+    elif selected_provider in ["openai", "anthropic", "xai", "meta", "groq", "deepseek", "together", "microsoft", "mistral", "amazon", "cohere"]:
+        # Generic handler for all other providers
+        provider, model = configure_generic_provider(selected_provider)
+        if provider is None:
+            # User cancelled API key entry - retry
+            return select_model_provider()
+        show_config_summary(provider, model)
+        return selected_provider
+
+def configure_generic_provider(provider_name):
+    """Generic configuration for cloud providers with arrow key model selection"""
+    from ai_agent.utils.settings_manager import get_settings_manager
+    from ai_agent.utils.interactive_menu import Colors, info_message, warning_message
+    from ai_agent.utils.curses_menu import get_curses_menu
+    
+    settings_manager = get_settings_manager()
+    
+    # Provider-specific model options (updated to current 2026 models)
+    provider_models = {
+        "openai": ["gpt-5.4", "gpt-5.4-pro", "gpt-5-mini", "gpt-4o"],
+        "anthropic": ["claude-opus-4.6", "claude-sonnet-4.6", "claude-sonnet-4.5"],
+        "xai": ["grok-4.20", "grok-4.20-beta"],
+        "meta": ["llama-4-scout-17b", "meta-llama-3.1-405b-instruct"],
+        "groq": ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "llama-3.1-8b-instant"],
+        "deepseek": ["deepseek-r1", "deepseek-v4"],
+        "together": ["meta-llama/Llama-4-Scout-17B-Instruct", "meta-llama/Llama-3.3-70B-Instruct-Turbo"],
+        "microsoft": ["gpt-5.4", "gpt-5.4-pro", "gpt-4o"],
+        "mistral": ["mistral-large-2411", "mistral-small-2409"],
+        "amazon": ["anthropic.claude-opus-4.6-v1:0", "anthropic.claude-sonnet-4.6-v1:0"],
+        "cohere": ["command-r-plus-08-2024", "command-r-08-2024"]
+    }
+    
+    # API key environment variables
+    api_key_vars = {
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "xai": "XAI_API_KEY",
+        "meta": "META_API_KEY",
+        "groq": "GROQ_API_KEY",
+        "deepseek": "DEEPSEEK_API_KEY",
+        "together": "TOGETHER_API_KEY",
+        "microsoft": "AZURE_API_KEY",
+        "mistral": "MISTRAL_API_KEY",
+        "amazon": "AWS_ACCESS_KEY_ID",
+        "cohere": "COHERE_API_KEY"
+    }
+    
+    info_message(f"🔑 Configuring {provider_name.upper()} Provider")
+    print(f"Environment variable: {api_key_vars[provider_name]}")
+    
+    # Check for existing API key
+    import os
+    existing_key = os.getenv(api_key_vars[provider_name])
+    if existing_key:
+        print(f"{Colors.GREEN}✓ API key found in environment{Colors.RESET}")
+        use_existing = input("Use existing API key? (Y/n): ").strip().lower()
+        if use_existing != 'n':
+            # Use arrow key menu for model selection
+            selected_model = select_model_with_arrows(provider_name, provider_models[provider_name])
+            if selected_model:
+                settings_manager.set_api_key(provider_name, existing_key)
+                settings_manager.set_model(provider_name, selected_model)
+                return provider_name, selected_model
+    
+    # Get API key from user
+    api_key = get_valid_api_key(f"Enter {provider_name.upper()} API key: ")
+    if not api_key:
+        return None, None
+    
+    # Use arrow key menu for model selection
+    selected_model = select_model_with_arrows(provider_name, provider_models[provider_name])
+    if not selected_model:
+        return None  # User cancelled selection
+    
+    # Save settings
+    settings_manager.set_api_key(provider_name, api_key)
+    settings_manager.set_model(provider_name, selected_model)
+    
+    print(f"{Colors.GREEN}✓ {provider_name.upper()} configured successfully!{Colors.RESET}")
+    return provider_name, selected_model
+
+
+def select_model_with_arrows(provider_name: str, models: list) -> Optional[str]:
+    """Select model using arrow keys in a curses menu"""
+    from ai_agent.utils.curses_menu import get_curses_menu
+    
+    menu = get_curses_menu(
+        f"🤖 {provider_name.upper()} Model Selection",
+        "Choose your preferred model using arrow keys:"
+    )
+    
+    # Add models to menu with descriptions
+    model_descriptions = {
+        "gpt-5.4": "Latest GPT-5.4 • Flagship • Advanced reasoning & coding",
+        "gpt-5.4-pro": "GPT-5.4 Pro • Professional tier • Enhanced capabilities",
+        "gpt-5-mini": "GPT-5 Mini • Cost-optimized • Fast inference",
+        "gpt-4o": "GPT-4 Omni • Multimodal • Strong capabilities",
+        "claude-opus-4.6": "Claude Opus 4.6 • Most advanced • Complex reasoning",
+        "claude-sonnet-4.6": "Claude Sonnet 4.6 • Latest • Near-Opus performance",
+        "claude-sonnet-4.5": "Claude Sonnet 4.5 • Enterprise • B2B workflows",
+        "grok-4.20": "Grok 4.20 • Real-time knowledge • Advanced reasoning",
+        "grok-4.20-beta": "Grok 4.20 Beta • Preview features",
+        "llama-4-scout-17b": "Meta's Llama 4 Scout • 17B • Latest generation",
+        "meta-llama-3.1-405b-instruct": "Meta's Llama 3.1 • 405B parameters",
+        "llama-3.3-70b-versatile": "Groq's Llama 3.3 • Fast inference",
+        "openai/gpt-oss-120b": "OpenAI GPT-OSS 120B • Open source • Powerful",
+        "llama-3.1-8b-instant": "Llama 3.1 8B • Fast & efficient",
+        "deepseek-r1": "DeepSeek R1 • Advanced reasoning • Uncensored",
+        "deepseek-v4": "DeepSeek V4 • Latest • 1T parameters • Efficient",
+        "meta-llama/Llama-4-Scout-17B-Instruct": "Together AI's Llama 4 Scout • Latest",
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo": "Together AI's Llama 3.3 • Optimized",
+        "mistral-large-2411": "Latest Mistral Large • Advanced capabilities",
+        "mistral-small-2409": "Mistral Small • Efficient and fast",
+        "anthropic.claude-opus-4.6-v1:0": "Claude Opus 4.6 via AWS • Enterprise",
+        "anthropic.claude-sonnet-4.6-v1:0": "Claude Sonnet 4.6 via AWS • Latest",
+        "command-r-plus-08-2024": "Cohere Command R+ • Advanced reasoning",
+        "command-r-08-2024": "Cohere Command R • Efficient"
+    }
+    
+    # Add each model to the menu
+    for model in models:
+        description = model_descriptions.get(model, f"{model} • Standard model")
+        icon = "🚀" if "latest" in description.lower() or "newest" in description.lower() else "🧠"
+        menu.add_item(model, description, model, icon)
+    
+    selected_model = menu.show()
+    return selected_model
+
+
+def get_valid_api_key(prompt):
+    """Get and validate API key from user input"""
+    from ai_agent.utils.interactive_menu import Colors, warning_message
+    
+    while True:
+        api_key = input(prompt).strip()
+        if not api_key:
+            return None
+        
+        if len(api_key) < 10:
+            warning_message("API key seems too short. Please check and try again.")
+            continue
+        
+        return api_key
+
 
 def main():
     """Main entry point"""
@@ -898,39 +1208,88 @@ def main():
     sys.path.insert(0, str(src_dir))
     
     # Validate arguments
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 2 and not any(flag in sys.argv for flag in ["--install-sdks", "--sdk-status", "--help"]):
         print("Usage: python3 run.py \"your instruction here\"")
         print("Example: python3 run.py \"Take a screenshot\"")
-        print("Use --help for more options")
+        print("\nOptions:")
+        print("  --install-sdks    Install missing AI provider SDKs")
+        print("  --sdk-status      Show AI provider SDK installation status")
+        print("  --debug           Enable debug mode")
+        print("  --no-prompt       Use saved provider preference without prompting")
+        print("  --help            Show this help message")
         sys.exit(1)
+    
+    # Show help
+    if "--help" in sys.argv:
+        print("VEXIS-CLI - AI-Powered Command Line Assistant")
+        print("=" * 50)
+        print("\nUsage: python3 run.py \"your instruction here\"")
+        print("\nExamples:")
+        print("  python3 run.py \"Take a screenshot\"")
+        print("  python3 run.py \"Create a new folder called projects\"")
+        print("  python3 run.py \"List all files in current directory\"")
+        print("\nOptions:")
+        print("  --install-sdks    Install missing AI provider SDKs")
+        print("  --sdk-status      Show AI provider SDK installation status")
+        print("  --debug           Enable debug mode")
+        print("  --no-prompt       Use saved provider preference without prompting")
+        print("  --help            Show this help message")
+        print("\nSDK Management:")
+        print("  python3 manage_sdks.py status          # Show SDK status")
+        print("  python3 manage_sdks.py install         # Install all missing SDKs")
+        print("  python3 manage_sdks.py install google  # Install specific SDK")
+        sys.exit(0)
     
     # Filter out flags to get the actual instruction
     instruction_args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
     instruction = " ".join(instruction_args)
     
-    if not instruction:
+    # Allow SDK management commands without instruction
+    sdk_only_commands = ["--install-sdks", "--sdk-status"]
+    if not instruction and not any(flag in sys.argv for flag in sdk_only_commands + ["--help"]):
         print("No instruction provided")
         print("Usage: python3 run.py \"your instruction here\"")
+        print("Use --help for more options")
         sys.exit(1)
     
     # Check for debug mode
     debug_mode = "--debug" in sys.argv
     
-    # Model selection - always prompt unless --no-prompt is used
+    # Check for SDK installation request
+    if "--install-sdks" in sys.argv:
+        print("🔧 Installing missing AI provider SDKs...")
+        try:
+            import subprocess
+            result = subprocess.run([sys.executable, "manage_sdks.py", "install"], 
+                                  capture_output=False, text=True, cwd=current_dir)
+            if result.returncode == 0:
+                print("✅ SDK installation completed")
+            else:
+                print("⚠️ Some SDK installations may have failed")
+        except Exception as e:
+            print(f"❌ Failed to run SDK installation: {e}")
+        print()
+    
+    # Check for SDK status request
+    if "--sdk-status" in sys.argv:
+        print("🔍 Checking AI provider SDK status...")
+        try:
+            import subprocess
+            subprocess.run([sys.executable, "manage_sdks.py", "status"], 
+                         capture_output=False, text=True, cwd=current_dir)
+        except Exception as e:
+            print(f"❌ Failed to check SDK status: {e}")
+        sys.exit(0)
+    
+    # Model selection - only prompt if not using --no-prompt flag
     if "--no-prompt" not in sys.argv:
-        print(f"\n🔧 Model Selection")
-        provider_result = select_model_provider()
-        if isinstance(provider_result, tuple):
-            selected_provider, selected_model = provider_result
-        else:
-            selected_provider = provider_result
-            selected_model = None
+        selected_provider = select_model_provider()
         print(f"\nUsing provider: {selected_provider}")
     else:
-        # When --no-prompt is used, default to ollama
-        selected_provider = "ollama"
-        selected_model = None
-        print(f"\nUsing default provider: {selected_provider}")
+        from ai_agent.utils.settings_manager import get_settings_manager
+        settings_manager = get_settings_manager()
+        selected_provider = settings_manager.get_preferred_provider()
+        print(f"\nUsing saved provider preference: {selected_provider}")
     
     print(f"\nAI Agent executing: {instruction}")
     
@@ -938,7 +1297,7 @@ def main():
         from ai_agent.user_interface.two_phase_app import TwoPhaseAIAgent
         
         # Update config with selected provider
-        config_path = current_dir / "config.json"
+        config_path = current_dir / "config.yaml"
         agent = TwoPhaseAIAgent(config_path=str(config_path) if config_path.exists() else None)
         
         # Update the vision client configuration with the selected provider
@@ -946,24 +1305,17 @@ def main():
             model_runner = agent.engine.model_runner
             if hasattr(model_runner, 'vision_client'):
                 # Update the vision client config
-                # Settings manager removed - use defaults
+                from ai_agent.utils.settings_manager import get_settings_manager
+                settings_manager = get_settings_manager()
                 
                 # Reload config with updated provider settings
                 updated_config = model_runner.config.copy()
                 updated_config['preferred_provider'] = selected_provider
-                
-                # Add model configuration based on provider
-                if selected_provider == "ollama" and selected_model:
-                    updated_config['local_model'] = selected_model
-                elif selected_provider == "google" and selected_model:
-                    updated_config['google_model'] = selected_model
+                updated_config['google_api_key'] = settings_manager.get_google_api_key()
+                updated_config['google_model'] = settings_manager.get_google_model()
                 
                 # Reinitialize vision client with updated config
                 model_runner.vision_client.config = updated_config
-                
-                # Validate the updated configuration
-                model_runner.config = updated_config
-                model_runner._validate_model_configuration()
         
         # Run the instruction
         options = {"debug": debug_mode}

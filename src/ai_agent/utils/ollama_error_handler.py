@@ -1,5 +1,5 @@
 """
-Enhanced Ollama Error Handler for VEXIS-CLI-1
+Enhanced Ollama Error Handler for VEXIS-CLI-1.1
 Provides user-friendly guidance for common Ollama issues including:
 - Permission errors
 - Model name errors  

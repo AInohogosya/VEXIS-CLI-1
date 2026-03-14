@@ -2,7 +2,7 @@
 
 ## Overview
 
-VEXIS-CLI-1 is built on a two-phase execution engine that processes natural language instructions and executes terminal operations with intelligent error handling and recovery mechanisms.
+VEXIS-CLI-1.1 is built on a two-phase execution engine that processes natural language instructions and executes terminal operations with intelligent error handling and recovery mechanisms.
 
 ## Core Architecture
 
@@ -10,7 +10,7 @@ VEXIS-CLI-1 is built on a two-phase execution engine that processes natural lang
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    VEXIS-CLI-1 System                      │
+│                    VEXIS-CLI-1.1 System                      │
 ├─────────────────────────────────────────────────────────────┤
 │  Phase 1: Command Planning                                 │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
@@ -103,7 +103,7 @@ async def execute_commands(self, commands: List[Command]) -> ExecutionResult
 **Architecture:**
 ```
 ┌─────────────────┐    HTTP/REST    ┌─────────────────┐
-│ VEXIS-CLI-1     │◄──────────────►│   Ollama        │
+│ VEXIS-CLI-1.1     │◄──────────────►│   Ollama        │
 │ Model Runner    │                │   Local Server  │
 └─────────────────┘                └─────────────────┘
         │                                   │
@@ -126,7 +126,7 @@ async def execute_commands(self, commands: List[Command]) -> ExecutionResult
 **Architecture:**
 ```
 ┌─────────────────┐    HTTPS/API    ┌─────────────────┐
-│ VEXIS-CLI-1     │◄──────────────►│ Google Cloud    │
+│ VEXIS-CLI-1.1     │◄──────────────►│ Google Cloud    │
 │ Model Runner    │                │   Gemini API    │
 └─────────────────┘                └─────────────────┘
         │                                   │

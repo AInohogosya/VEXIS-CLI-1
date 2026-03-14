@@ -47,9 +47,9 @@ dependencies = [
 "vexis-cli-enhanced" = "ai_agent.user_interface.two_phase_app:main"
 
 [project.urls]
-Homepage = "https://github.com/AInohogosya-team/VEXIS-CLI-1"
-Repository = "https://github.com/AInohogosya-team/VEXIS-CLI-1"
-"Bug Reports" = "https://github.com/AInohogosya-team/VEXIS-CLI-1/issues"
+Homepage = "https://github.com/AInohogosya-team/VEXIS-CLI-1.1"
+Repository = "https://github.com/AInohogosya-team/VEXIS-CLI-1.1"
+"Bug Reports" = "https://github.com/AInohogosya-team/VEXIS-CLI-1.1/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

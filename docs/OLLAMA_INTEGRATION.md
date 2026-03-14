@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers comprehensive integration with Ollama, including setup, configuration, model management, and troubleshooting for VEXIS-CLI-1.
+This guide covers comprehensive integration with Ollama, including setup, configuration, model management, and troubleshooting for VEXIS-CLI-1.1.
 
 ## Ollama Architecture
 
@@ -10,7 +10,7 @@ This guide covers comprehensive integration with Ollama, including setup, config
 
 ```
 ┌─────────────────┐    HTTP/REST    ┌─────────────────┐
-│ VEXIS-CLI-1     │◄──────────────►│   Ollama        │
+│ VEXIS-CLI-1.1     │◄──────────────►│   Ollama        │
 │ Model Runner    │                │   Local Server  │
 └─────────────────┘                └─────────────────┘
         │                                   │
@@ -1161,4 +1161,4 @@ fi
 echo "=== Diagnostic Complete ==="
 ```
 
-This comprehensive Ollama integration guide provides everything needed to set up, configure, optimize, and troubleshoot Ollama integration with VEXIS-CLI-1.
+This comprehensive Ollama integration guide provides everything needed to set up, configure, optimize, and troubleshoot Ollama integration with VEXIS-CLI-1.1.
