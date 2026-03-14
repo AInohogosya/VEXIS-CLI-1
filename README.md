@@ -19,7 +19,7 @@
 
 ### AI Providers
 
-**Local/Privacy-First:**
+**A provider that supports both cloud and local environments:**
 - **Ollama**: You can use Ollama's local models or cloud models. It is recommended to sign in to Ollama in advance.
 
 **Cloud Providers (API Key Required):**
