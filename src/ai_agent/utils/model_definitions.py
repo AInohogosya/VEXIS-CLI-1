@@ -240,6 +240,13 @@ MODEL_FAMILIES = {
                 "description": "Open-source multimodal models with exceptional utility and performance",
                 "icon": "🌟",
                 "models": {
+                    "qwen3.5:122b": {"name": "Qwen 3.5 122B", "desc": "122B parameters • Multimodal • Frontier performance", "icon": "👑"},
+                    "qwen3.5:35b": {"name": "Qwen 3.5 35B", "desc": "35B parameters • Multimodal • Advanced performance", "icon": "🧠"},
+                    "qwen3.5:27b": {"name": "Qwen 3.5 27B", "desc": "27B parameters • Multimodal • High performance", "icon": "💪"},
+                    "qwen3.5:9b": {"name": "Qwen 3.5 9B", "desc": "9B parameters • Multimodal • Exceptional performance", "icon": "🧠"},
+                    "qwen3.5:4b": {"name": "Qwen 3.5 4B", "desc": "4B parameters • Multimodal • Efficient performance", "icon": "💪"},
+                    "qwen3.5:2b": {"name": "Qwen 3.5 2B", "desc": "2B parameters • Multimodal • Lightweight", "icon": "⚡"},
+                    "qwen3.5:0.8b": {"name": "Qwen 3.5 0.8B", "desc": "0.8B parameters • Multimodal • Ultra lightweight", "icon": "🪶"},
                     "qwen3.5:cloud": {"name": "Qwen 3.5 Cloud", "desc": "Multimodal • Exceptional performance • Cloud only", "icon": "🌟"},
                 }
             },
