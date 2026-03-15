@@ -62,7 +62,7 @@ class TerminalSession:
     start_time: float
     entries: List[TerminalEntry] = field(default_factory=list)
     end_time: Optional[float] = None
-    current_working_directory: str = field(default_factory=lambda: str(Path.cwd()))
+    current_working_directory: str = field(default_factory=lambda: str(Path(__file__).parent.parent.parent.parent))
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -120,14 +120,17 @@ class TerminalHistory:
             self.logger = get_logger("terminal_history")
             
             # Initialize terminal session
+            # Initialize terminal session with project root as working directory
+            # Navigate to top-level directory (VEXIS-CLI-1.1) first
+            project_root = Path(__file__).parent.parent.parent.parent
             self.terminal_session = TerminalSession(
                 session_id=self.session_id,
                 start_time=time.time(),
-                current_working_directory=str(Path.cwd())
+                current_working_directory=str(project_root)
             )
             
-            # Track current working directory with OS-independent path
-            self._current_directory = Path.cwd()
+            # Track current working directory with project root
+            self._current_directory = project_root
             self._previous_directory = None  # For cd - command
             
             # Platform-specific settings
