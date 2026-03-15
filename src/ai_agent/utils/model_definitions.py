@@ -124,6 +124,14 @@ MODEL_FAMILIES = {
                     "deepseek-v3.1:671b-cloud": {"name": "DeepSeek V3.1 671B Cloud", "desc": "671B parameters • Enhanced • Cloud only", "icon": "🚀"},
                 }
             },
+            "deepseek-v3.2": {
+                "name": "DeepSeek V3.2",
+                "description": "Latest generation DeepSeek V3 with advanced capabilities and optimizations",
+                "icon": "🔥",
+                "models": {
+                    "deepseek-v3.2:cloud": {"name": "DeepSeek V3.2 Cloud", "desc": "Advanced capabilities • Optimized performance • Cloud only", "icon": "🌟"},
+                }
+            },
             "deepseek-coder-v2": {
                 "name": "DeepSeek Coder V2",
                 "description": "Open-source MoE code language model comparable to GPT4-Turbo",
