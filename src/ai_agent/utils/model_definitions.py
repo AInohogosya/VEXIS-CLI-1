@@ -31,6 +31,16 @@ MODEL_FAMILIES = {
                     "llama3.2:1b": {"name": "Llama 3.2 1B", "desc": "1B parameters • Ultra lightweight • 128K context", "icon": "🪶"},
                     "llama3.2:latest": {"name": "Llama 3.2 Latest", "desc": "3B parameters • Lightweight • 128K context", "icon": "⭐"},
                 }
+            },
+            "llama4": {
+                "name": "Llama 4",
+                "description": "Next generation Llama models with advanced reasoning and multimodal capabilities",
+                "icon": "🚀",
+                "models": {
+                    "llama4:latest": {"name": "Llama 4 Latest", "desc": "Latest Llama 4 • Advanced reasoning • Multimodal", "icon": "⭐"},
+                    "llama4:16x17b": {"name": "Llama 4 16x17B", "desc": "272B total • 16x17B MoE • Advanced reasoning", "icon": "🧠"},
+                    "llama4:128x17b": {"name": "Llama 4 128x17B", "desc": "2.18T total • 128x17B MoE • Frontier performance", "icon": "👑"},
+                }
             }
         }
     },
