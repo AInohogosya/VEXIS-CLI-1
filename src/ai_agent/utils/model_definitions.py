@@ -71,6 +71,16 @@ MODEL_FAMILIES = {
                     "gemma3:1b": {"name": "Gemma 3 1B", "desc": "1B parameters • Text only • 32K context", "icon": "🪶"},
                     "gemma3:270m": {"name": "Gemma 3 270M", "desc": "270M parameters • Text only • 32K context", "icon": "✨"},
                 }
+            },
+            "gemma3n": {
+                "name": "Gemma 3n",
+                "description": "Mobile-first architecture optimized for on-device performance and efficiency",
+                "icon": "📱",
+                "models": {
+                    "gemma3n:e4b": {"name": "Gemma 3n E4B", "desc": "4B effective • Multimodal • On-device optimized", "icon": "🧠"},
+                    "gemma3n:e2b": {"name": "Gemma 3n E2B", "desc": "2B effective • Multimodal • Ultra efficient", "icon": "⚡"},
+                    "gemma3n:latest": {"name": "Gemma 3n Latest", "desc": "4B effective • Multimodal • On-device optimized", "icon": "⭐"},
+                }
             }
         }
     },
