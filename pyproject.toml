@@ -9,7 +9,7 @@ description = "AI command-line agent for terminal automation and task execution"
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "AInohogosya-team"}
+    {name = "VEXIS Contributors"}
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -47,9 +47,9 @@ dependencies = [
 "vexis-cli-enhanced" = "ai_agent.user_interface.two_phase_app:main"
 
 [project.urls]
-Homepage = "https://github.com/AInohogosya-team/VEXIS-CLI-1.2"
-Repository = "https://github.com/AInohogosya-team/VEXIS-CLI-1.2"
-"Bug Reports" = "https://github.com/AInohogosya-team/VEXIS-CLI-1.2/issues"
+Homepage = "https://github.com/vexis-project/VEXIS-CLI-1.2"
+Repository = "https://github.com/vexis-project/VEXIS-CLI-1.2"
+"Bug Reports" = "https://github.com/vexis-project/VEXIS-CLI-1.2/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -17,7 +17,7 @@ This guide covers development setup, coding standards, testing practices, and co
 
 ```bash
 # Clone the repository
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.2.git
+git clone https://github.com/vexis-project/VEXIS-CLI-1.2.git
 cd VEXIS-CLI-1.2
 
 # Create virtual environment

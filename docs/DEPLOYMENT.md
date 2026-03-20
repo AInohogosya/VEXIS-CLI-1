@@ -108,7 +108,7 @@ ollama --version
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.2.git
+git clone https://github.com/vexis-project/VEXIS-CLI-1.2.git
 cd VEXIS-CLI-1.2
 
 # 2. Create virtual environment
@@ -712,7 +712,7 @@ sudo chown ec2-user:ec2-user /opt/vexis
 
 # Clone repository
 cd /opt/vexis
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.2.git .
+git clone https://github.com/vexis-project/VEXIS-CLI-1.2.git .
 
 # Set up environment
 echo "GOOGLE_API_KEY=${GOOGLE_API_KEY}" > .env

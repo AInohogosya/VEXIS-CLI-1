@@ -38,7 +38,7 @@
 
 > **🎯 Now Functional**: All 13 providers are now integrated and working through the unified API system!
 
-> **💡 AInohogosya-Team Recommendations**: For best performance and reliability, we recommend **Groq** (fast inference), **Google Gemini** (enterprise-grade), **OpenAI** (advanced capabilities), and **Ollama** (privacy-first local).
+> **💡 VEXIS Project Recommendations**: For best performance and reliability, we recommend **Groq** (fast inference), **Google Gemini** (enterprise-grade), **OpenAI** (advanced capabilities), and **Ollama** (privacy-first local).
 
 > **⚠️ Provider Compatibility**: While we support 13+ AI providers, using other providers beyond our recommendations may occasionally encounter errors or bugs due to API differences or model-specific behaviors.
 
@@ -61,7 +61,7 @@
 ## Installation
 
 ```bash
-git clone https://github.com/AInohogosya-team/VEXIS-CLI-1.2.git
+git clone https://github.com/vexis-project/VEXIS-CLI-1.2.git
 cd VEXIS-CLI-1.2
 python3 run.py "list files"  # Dependencies handled automatically
 ```

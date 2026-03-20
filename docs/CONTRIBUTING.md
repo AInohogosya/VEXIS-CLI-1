@@ -24,7 +24,7 @@ Thank you for your interest in contributing to VEXIS-CLI-1.2! This guide covers 
 
 2. **Add Upstream Remote**
    ```bash
-   git remote add upstream https://github.com/AInohogosya-team/VEXIS-CLI-1.2.git
+   git remote add upstream https://github.com/vexis-project/VEXIS-CLI-1.2.git
    ```
 
 3. **Set Up Development Environment**
