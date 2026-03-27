@@ -29,22 +29,22 @@ class APISettings:
     deepseek_api_key: Optional[str] = None
     together_api_key: Optional[str] = None
     minimax_api_key: Optional[str] = None
-    preferred_provider: str = ""  # Must be explicitly set by user
+    preferred_provider: str = "ollama"  # Must be explicitly set by user
     save_api_key: bool = True
     google_model: str = "gemini-3.1-pro"
     groq_model: str = "llama-3.3-70b-versatile"
     openai_model: str = "gpt-5.4"
-    anthropic_model: str = "claude-opus-4.6"
+    anthropic_model: str = "claude-sonnet-4.6"
     xai_model: str = "grok-4.20"
     meta_model: str = "llama-4-scout-17b"
     mistral_model: str = "mistral-large-2411"
     microsoft_model: str = "gpt-5.4"
     amazon_model: str = "anthropic.claude-opus-4.6-v1:0"
     cohere_model: str = "command-r-plus-08-2024"
-    deepseek_model: str = "deepseek-r1"
+    deepseek_model: str = "deepseek-v3.2"
     together_model: str = "meta-llama/Llama-4-Scout-17B-Instruct"
     minimax_model: str = "minimax-m2.7"
-    ollama_model: str = "llama3.2:latest"
+    ollama_model: str = "qwen3.5:2b"
 
 
 class SettingsManager:
