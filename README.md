@@ -107,8 +107,8 @@
 
 ### 🎯 **Zero-Configuration Quick Start**
 ```bash
-git clone https://github.com/vexis-project/VEXIS-CLI-2.0.git
-cd VEXIS-CLI-2.0
+git clone https://github.com/AInohogosya/VEXIS-CLI-2.git
+cd VEXIS-CLI-2
 python3 run.py "list files"  # Auto-setup and run!
 ```
 
@@ -122,7 +122,7 @@ python3 run.py "list files"  # Auto-setup and run!
 > ⚠️ **Note**: Bugs may occur with certain models or providers. If you encounter issues, please try selecting a different model or provider. We will fix the issue as soon as the cause is identified.
 
 ### 🎨 **First Run Experience**
-VEXIS-CLI-2.0 features an enhanced provider selection interface with real-time performance metrics:
+VEXIS-CLI-2 features an enhanced provider selection interface with real-time performance metrics:
 
 ![Enhanced Provider Selection](Choose_model.png)
 
@@ -167,7 +167,7 @@ python3 run.py "analyze this screenshot and suggest improvements" --image screen
 ## ⚙️ Configuration
 
 ### 📝 **Advanced Configuration System**
-VEXIS-CLI-2.0 uses a hierarchical configuration system with validation:
+VEXIS-CLI-2 uses a hierarchical configuration system with validation:
 
 ```yaml
 # API Configuration
@@ -252,7 +252,7 @@ graph TB
 
 ## 🛠️ Development & Contributing
 
-### 🤝 **Contributing to VEXIS-CLI-2.0**
+### 🤝 **Contributing to VEXIS-CLI-2**
 We welcome contributions to our advanced AI automation platform:
 
 1. **🐛 Bug Reports**: Use our detailed issue templates for precise reporting
@@ -310,12 +310,12 @@ python3 test_improved_prompts.py --benchmark
 
 ### 💬 **Get Help**
 - 📖 [Comprehensive Documentation](./docs/)
-- 🐛 [Advanced Issue Tracker](https://github.com/vexis-project/VEXIS-CLI-2.0/issues)
-- 💬 [Community Discussions](https://github.com/vexis-project/VEXIS-CLI-2.0/discussions)
+- 🐛 [Advanced Issue Tracker](https://github.com/AInohogosya/VEXIS-CLI-2/issues)
+- 💬 [Community Discussions](https://github.com/AInohogosya/VEXIS-CLI-2/discussions)
 - 🏢 [Enterprise Support](mailto:enterprise@vexis-project.com)
 
 ### ⭐ **Show Your Support**
-- **⭐ Star the repository** - Help others discover VEXIS-CLI-2.0
+- **⭐ Star the repository** - Help others discover VEXIS-CLI-2
 - **🔄 Fork and contribute** - Build on our 5-phase architecture
 - **📝 Share your use cases** - Inspire the community with innovative applications
 
@@ -325,9 +325,9 @@ python3 test_improved_prompts.py --benchmark
 
 ## 🎉 Experience the Future of Terminal Automation
 
-**VEXIS-CLI-2.0: Where advanced AI meets precise command execution**
+**VEXIS-CLI-2: Where advanced AI meets precise command execution**
 
-[🚀 Get Started Now](#installation) • [⭐ Star on GitHub](https://github.com/vexis-project/VEXIS-CLI-2.0) • [📖 Explore Documentation](./docs/) • [🏢 Enterprise Support](mailto:enterprise@vexis-project.com)
+[🚀 Get Started Now](#installation) • [⭐ Star on GitHub](https://github.com/AInohogosya/VEXIS-CLI-2) • [📖 Explore Documentation](./docs/) • [🏢 Enterprise Support](AInohogosya@proton.me)
 
 ---
 
