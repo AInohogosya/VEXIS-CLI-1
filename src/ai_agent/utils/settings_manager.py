@@ -30,6 +30,7 @@ class APISettings:
     together_api_key: Optional[str] = None
     minimax_api_key: Optional[str] = None
     zhipuai_api_key: Optional[str] = None
+    openrouter_api_key: Optional[str] = None
     preferred_provider: str = "ollama"  # Must be explicitly set by user
     save_api_key: bool = True
     google_model: str = "gemini-3.1-pro-preview"
@@ -46,6 +47,7 @@ class APISettings:
     together_model: str = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
     minimax_model: str = "MiniMax-Text-01"
     zhipuai_model: str = "glm-5"
+    openrouter_model: str = "openai/gpt-4o-mini"
     ollama_model: str = "qwen3.5:2b"
 
 
@@ -371,11 +373,40 @@ class SettingsManager:
         """Set preferred provider"""
         valid_providers = ["ollama", "google", "groq", "openai", "anthropic", 
                           "xai", "meta", "mistral", "microsoft", "amazon", 
-                          "cohere", "deepseek", "together", "minimax", "zhipuai"]
+                          "cohere", "deepseek", "together", "minimax", "zhipuai", "openrouter"]
         if provider not in valid_providers:
             raise ValueError(f"Provider must be one of: {valid_providers}")
         self._settings.preferred_provider = provider
         self.logger.info(f"Preferred provider set to: {provider}")
+    
+    def set_openrouter_api_key(self, api_key: str, save_key: bool = True):
+        """Set OpenRouter API key"""
+        self._settings.openrouter_api_key = api_key
+        self._settings.save_api_key = save_key
+        self.logger.info("OpenRouter API key updated")
+    
+    def get_openrouter_api_key(self) -> Optional[str]:
+        """Get OpenRouter API key"""
+        return self._settings.openrouter_api_key
+    
+    def has_openrouter_api_key(self) -> bool:
+        """Check if OpenRouter API key is available"""
+        return bool(self._settings.openrouter_api_key)
+    
+    def clear_openrouter_api_key(self):
+        """Clear OpenRouter API key"""
+        self._settings.openrouter_api_key = None
+        self.logger.info("OpenRouter API key cleared")
+    
+    def set_openrouter_model(self, model: str):
+        """Set OpenRouter model"""
+        # Accept any valid OpenRouter model name - validation will be done during selection
+        self._settings.openrouter_model = model
+        self.logger.info(f"OpenRouter model set to: {model}")
+    
+    def get_openrouter_model(self) -> str:
+        """Get OpenRouter model"""
+        return self._settings.openrouter_model
     
     def set_api_key(self, provider: str, api_key: str, save_key: bool = True):
         """Generic API key setter for any provider"""
@@ -393,7 +424,8 @@ class SettingsManager:
             "deepseek": "deepseek_api_key",
             "together": "together_api_key",
             "minimax": "minimax_api_key",
-            "zhipuai": "zhipuai_api_key"
+            "zhipuai": "zhipuai_api_key",
+            "openrouter": "openrouter_api_key"
         }
         
         if provider not in provider_key_map:
@@ -420,7 +452,8 @@ class SettingsManager:
             "together": "together_model",
             "minimax": "minimax_model",
             "zhipuai": "zhipuai_model",
-            "ollama": "ollama_model"
+            "ollama": "ollama_model",
+            "openrouter": "openrouter_model"
         }
         
         if provider not in provider_model_map:
@@ -445,7 +478,8 @@ class SettingsManager:
             "deepseek": "deepseek_api_key",
             "together": "together_api_key",
             "minimax": "minimax_api_key",
-            "zhipuai": "zhipuai_api_key"
+            "zhipuai": "zhipuai_api_key",
+            "openrouter": "openrouter_api_key"
         }
         
         if provider not in provider_key_map:
@@ -470,7 +504,8 @@ class SettingsManager:
             "together": "together_model",
             "minimax": "minimax_model",
             "zhipuai": "zhipuai_model",
-            "ollama": "ollama_model"
+            "ollama": "ollama_model",
+            "openrouter": "openrouter_model"
         }
         
         if provider not in provider_model_map:

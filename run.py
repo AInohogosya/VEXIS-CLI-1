@@ -909,6 +909,13 @@ def select_model_provider():
     )
     
     menu.add_item(
+        "OpenRouter",
+        "Access 300+ AI models via OpenRouter • Requires API key",
+        "openrouter",
+        "🔀"
+    )
+    
+    menu.add_item(
         "OpenAI (Beta)",
         "Use OpenAI's GPT models • Requires API key",
         "openai",
@@ -1034,6 +1041,14 @@ def select_model_provider():
         show_config_summary(provider, model)
         return provider, model
         
+    elif selected_provider == "openrouter":
+        provider, model = configure_generic_provider(selected_provider)
+        if provider is None:
+            # User cancelled API key entry - retry
+            return select_model_provider()
+        show_config_summary(provider, model)
+        return provider, model
+        
     elif selected_provider in ["openai", "anthropic", "xai", "meta", "groq", "deepseek", "together", "microsoft", "mistral", "amazon", "cohere", "minimax", "zhipuai"]:
         # Generic handler for all other providers
         provider, model = configure_generic_provider(selected_provider)
@@ -1075,6 +1090,33 @@ def configure_generic_provider(provider_name):
         "cohere": ["command-r-plus", "command-r", "command"],
         "minimax": ["MiniMax-Text-01", "abab6.5s"],
         "zhipuai": ["glm-5", "glm-5.1", "glm-4-plus", "glm-4"],
+        "openrouter": [
+            "openai/gpt-4o",
+            "openai/gpt-4o-mini",
+            "openai/gpt-4-turbo",
+            "openai/gpt-3.5-turbo",
+            "anthropic/claude-3.5-sonnet",
+            "anthropic/claude-3.5-haiku",
+            "anthropic/claude-3-opus",
+            "google/gemini-2.0-flash-exp",
+            "google/gemini-1.5-pro",
+            "google/gemini-1.5-flash",
+            "meta-llama/llama-3.1-405b-instruct",
+            "meta-llama/llama-3.1-70b-instruct",
+            "meta-llama/llama-3.1-8b-instruct",
+            "mistralai/mistral-large",
+            "mistralai/mixtral-8x7b",
+            "mistralai/mistral-7b-instruct",
+            "deepseek/deepseek-r1",
+            "deepseek/deepseek-chat",
+            "groq/llama-3.1-405b-reasoning",
+            "groq/llama-3.1-70b-versatile",
+            "qwen/qwen-2.5-72b-instruct",
+            "cohere/command-r-plus",
+            "perplexity/llama-3.1-sonar-large-128k-online",
+            "nvidia/nemotron-4-340b-instruct",
+            "Other Models"
+        ],
         "google": [
             "gemini-3.1-pro-preview",
             "gemini-3-flash-preview",
@@ -1098,7 +1140,8 @@ def configure_generic_provider(provider_name):
         "amazon": "AWS_ACCESS_KEY_ID",
         "cohere": "COHERE_API_KEY",
         "minimax": "MINIMAX_API_KEY",
-        "zhipuai": "ZHIPUAI_API_KEY"
+        "zhipuai": "ZHIPUAI_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY"
     }
     
     info_message(f"🔑 Configuring {provider_name.upper()} Provider")
@@ -1114,9 +1157,19 @@ def configure_generic_provider(provider_name):
             # Use arrow key menu for model selection
             selected_model = select_model_with_arrows(provider_name, provider_models[provider_name])
             if selected_model:
-                settings_manager.set_api_key(provider_name, existing_key)
-                settings_manager.set_model(provider_name, selected_model)
-                return provider_name, selected_model
+                # Special handling for OpenRouter "Other Models"
+                if provider_name == "openrouter" and selected_model == "Other Models":
+                    custom_model = get_custom_model_name()
+                    if custom_model:
+                        settings_manager.set_api_key(provider_name, existing_key)
+                        settings_manager.set_model(provider_name, custom_model)
+                        return provider_name, custom_model
+                    else:
+                        return None, None  # User cancelled custom model entry
+                else:
+                    settings_manager.set_api_key(provider_name, existing_key)
+                    settings_manager.set_model(provider_name, selected_model)
+                    return provider_name, selected_model
     
     # Get API key from user
     api_key = get_valid_api_key(f"Enter {provider_name.upper()} API key: ")
@@ -1128,6 +1181,13 @@ def configure_generic_provider(provider_name):
     if not selected_model:
         return None, None  # User cancelled selection
     
+    # Special handling for OpenRouter "Other Models"
+    if provider_name == "openrouter" and selected_model == "Other Models":
+        custom_model = get_custom_model_name()
+        if not custom_model:
+            return None, None  # User cancelled custom model entry
+        selected_model = custom_model
+    
     # Save settings
     settings_manager.set_api_key(provider_name, api_key)
     settings_manager.set_model(provider_name, selected_model)
@@ -1135,6 +1195,38 @@ def configure_generic_provider(provider_name):
 
     print(f"{Colors.GREEN}✓ {provider_name.upper()} configured successfully!{Colors.RESET}")
     return provider_name, selected_model
+
+
+def get_custom_model_name() -> Optional[str]:
+    """Get custom model name from user for OpenRouter"""
+    from ai_agent.utils.interactive_menu import Colors, info_message
+    
+    info_message("🔧 Enter Custom OpenRouter Model")
+    print(f"{Colors.CYAN}You can use any official OpenRouter model name.{Colors.RESET}")
+    print(f"{Colors.CYAN}Examples: openrouter/auto, meta-llama/llama-3.1-70b-instruct, etc.{Colors.RESET}")
+    print(f"{Colors.YELLOW}Visit https://openrouter.ai/models for available models{Colors.RESET}")
+    print()
+    
+    while True:
+        model_name = input(f"{Colors.WHITE}Enter model name (or 'cancel' to abort): {Colors.RESET}").strip()
+        
+        if model_name.lower() == 'cancel':
+            print(f"{Colors.YELLOW}Cancelled custom model entry.{Colors.RESET}")
+            return None
+        
+        if not model_name:
+            print(f"{Colors.RED}Model name cannot be empty. Try again or type 'cancel'.{Colors.RESET}")
+            continue
+        
+        # Basic validation
+        if '/' not in model_name:
+            print(f"{Colors.YELLOW}Warning: Model names usually contain a provider prefix (e.g., 'openai/gpt-4o'){Colors.RESET}")
+            confirm = input(f"Continue with '{model_name}'? (y/N): ").strip().lower()
+            if confirm != 'y':
+                continue
+        
+        print(f"{Colors.GREEN}✓ Using custom model: {model_name}{Colors.RESET}")
+        return model_name
 
 
 def select_model_with_arrows(provider_name: str, models: list) -> Optional[str]:

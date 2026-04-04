@@ -18,6 +18,7 @@ from ..utils.exceptions import ValidationError
 from ..utils.logger import get_logger
 from ..utils.config import load_config
 from .ollama_provider import SimpleOllamaProvider
+from .openrouter_provider import OpenRouterProvider
 
 # Import API clients with error handling
 try:
@@ -42,6 +43,7 @@ class APIProvider(Enum):
     """Supported API providers - Extended to 13+ providers"""
     OLLAMA = "ollama"
     GOOGLE = "google"
+    OPENROUTER = "openrouter"
     
     # Additional providers (when API package is available)
     if API_AVAILABLE:
@@ -100,6 +102,9 @@ class MultiProviderVisionAPIClient:
         
         # Initialize Ollama provider (always available)
         self.ollama_provider = SimpleOllamaProvider()
+        
+        # Initialize OpenRouter provider (always available, needs API key)
+        self.openrouter_provider = OpenRouterProvider(self.config)
         
         # Initialize SDK installer if available
         self.sdk_installer = None
@@ -179,6 +184,10 @@ class MultiProviderVisionAPIClient:
             if provider == 'ollama':
                 return self._handle_ollama_request(request, start_time)
             
+            # Handle OpenRouter provider
+            if provider == 'openrouter':
+                return self._handle_openrouter_request(request, start_time)
+            
             # Handle multi-provider API
             if API_AVAILABLE and provider in self.api_clients:
                 return self._handle_api_request(request, provider, start_time)
@@ -223,6 +232,32 @@ class MultiProviderVisionAPIClient:
                 content="",
                 model=request.model or 'unknown',
                 provider='ollama',
+                error=str(e),
+                latency=time.time() - start_time
+            )
+    
+    def _handle_openrouter_request(self, request: APIRequest, start_time: float) -> APIResponse:
+        """Handle OpenRouter requests"""
+        try:
+            # Use OpenRouter provider with proper system instruction support
+            openrouter_response = self.openrouter_provider.analyze_image(request)
+            
+            return APIResponse(
+                success=openrouter_response.success,
+                content=openrouter_response.content,
+                model=openrouter_response.model,
+                provider='openrouter',
+                error=openrouter_response.error,
+                tokens_used=openrouter_response.tokens_used,
+                cost=openrouter_response.cost,
+                latency=time.time() - start_time
+            )
+        except Exception as e:
+            return APIResponse(
+                success=False,
+                content="",
+                model=request.model or 'unknown',
+                provider='openrouter',
                 error=str(e),
                 latency=time.time() - start_time
             )
