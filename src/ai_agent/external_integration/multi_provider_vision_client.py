@@ -240,7 +240,15 @@ class MultiProviderVisionAPIClient:
         """Handle OpenRouter requests"""
         try:
             # Use OpenRouter provider with proper system instruction support
-            openrouter_response = self.openrouter_provider.analyze_image(request)
+            openrouter_response = self.openrouter_provider.chat(
+                prompt=request.prompt,
+                model=request.model,
+                temperature=request.temperature,
+                max_tokens=request.max_tokens,
+                system_instructions=request.system_instruction,
+                image_data=request.image_data,
+                image_format=request.image_format
+            )
             
             return APIResponse(
                 success=openrouter_response.success,

@@ -21,18 +21,31 @@ try:
 except ImportError:
     raise ImportError("PIL (Pillow) is required for OpenRouter API provider")
 
-from ..vision_api_client import APIRequest, APIResponse, BaseAPIProvider
 from ai_agent.utils.exceptions import APIError, ValidationError
 from ai_agent.utils.logger import get_logger
 
 
-class OpenRouterProvider(BaseAPIProvider):
+@dataclass
+class OpenRouterResponse:
+    """OpenRouter response structure"""
+    success: bool
+    content: str
+    model: str
+    provider: str
+    tokens_used: Optional[int] = None
+    cost: Optional[float] = None
+    error: Optional[str] = None
+
+
+class OpenRouterProvider:
     """OpenRouter API provider - access to 300+ AI models"""
     
     def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
+        self.config = config
         self.api_key = config.get("openrouter_api_key")
         self.endpoint = "https://openrouter.ai/api/v1/chat/completions"
+        self.timeout = config.get("timeout", 120)
+        self.logger = get_logger("openrouter_provider")
         
         # Popular OpenRouter models (verified official names)
         self.popular_models = [
@@ -89,10 +102,10 @@ class OpenRouterProvider(BaseAPIProvider):
         """Get list of available models"""
         return self.popular_models + ["Other Models"]
     
-    def analyze_image(self, request: APIRequest) -> APIResponse:
-        """Analyze image using OpenRouter API"""
+    def chat(self, prompt: str, model: Optional[str] = None, temperature: float = 1.0, max_tokens: int = 5000, system_instructions: Optional[str] = None, image_data: Optional[bytes] = None, image_format: str = "PNG") -> OpenRouterResponse:
+        """Send a chat request to OpenRouter"""
         if not self.api_key:
-            return APIResponse(
+            return OpenRouterResponse(
                 success=False,
                 content="",
                 model=self.default_model,
@@ -101,12 +114,12 @@ class OpenRouterProvider(BaseAPIProvider):
             )
         
         # Handle "Other Models" option
-        model_name = request.model
+        model_name = model or self.default_model
         if model_name == "Other Models" or model_name not in self.popular_models:
             # Use the exact model name provided by user
             if model_name == "Other Models":
                 # This shouldn't happen in normal flow, but handle it gracefully
-                return APIResponse(
+                return OpenRouterResponse(
                     success=False,
                     content="",
                     model="unknown",
@@ -118,28 +131,28 @@ class OpenRouterProvider(BaseAPIProvider):
             # Prepare the request payload for OpenRouter API
             # Add unique identifier at the beginning to bypass caching
             unique_id = str(uuid.uuid4())
-            unique_prompt = f"Unique Request ID: {unique_id}\n\n{request.prompt}"
+            unique_prompt = f"Unique Request ID: {unique_id}\n\n{prompt}"
             
             # Build messages array
             messages = []
-            if request.system_instruction:
-                messages.append({"role": "system", "content": request.system_instruction})
+            if system_instructions:
+                messages.append({"role": "system", "content": system_instructions})
             messages.append({"role": "user", "content": unique_prompt})
             
             payload = {
                 "model": model_name,
                 "messages": messages,
-                "max_tokens": request.max_tokens,
-                "temperature": request.temperature,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
             }
             
             # Add image if provided
-            if request.image_data:
+            if image_data:
                 # Convert image to base64
-                image_base64 = base64.b64encode(request.image_data).decode('utf-8')
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
                 # Determine MIME type
-                image_format = request.image_format.lower()
-                mime_type = f"image/{image_format}" if image_format in ["jpeg", "jpg", "png", "webp", "gif"] else "image/png"
+                image_format_lower = image_format.lower()
+                mime_type = f"image/{image_format_lower}" if image_format_lower in ["jpeg", "jpg", "png", "webp", "gif"] else "image/png"
                 
                 # Add image to the last message
                 messages[-1]["content"] = [
@@ -177,7 +190,7 @@ class OpenRouterProvider(BaseAPIProvider):
                 if "usage" in result:
                     tokens_used = result["usage"].get("total_tokens")
                 
-                return APIResponse(
+                return OpenRouterResponse(
                     success=True,
                     content=content,
                     model=model_name,
@@ -187,7 +200,7 @@ class OpenRouterProvider(BaseAPIProvider):
                 )
             else:
                 error_msg = f"HTTP {response.status_code}: {response.text}"
-                return APIResponse(
+                return OpenRouterResponse(
                     success=False,
                     content="",
                     model=model_name,
@@ -196,13 +209,25 @@ class OpenRouterProvider(BaseAPIProvider):
                 )
             
         except Exception as e:
-            return APIResponse(
+            return OpenRouterResponse(
                 success=False,
                 content="",
                 model=model_name,
                 provider=self.name,
                 error=str(e),
             )
+    
+    def analyze_image(self, request):  # Compatibility method
+        """Analyze image using OpenRouter API - compatibility wrapper"""
+        return self.chat(
+            prompt=request.prompt,
+            model=request.model,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            system_instructions=getattr(request, 'system_instruction', None),
+            image_data=getattr(request, 'image_data', None),
+            image_format=getattr(request, 'image_format', 'PNG')
+        )
     
     def _calculate_cost(self, model: str, tokens: Optional[int] = None) -> Optional[float]:
         """Calculate cost for OpenRouter API"""

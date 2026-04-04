@@ -1203,8 +1203,14 @@ def get_custom_model_name() -> Optional[str]:
     
     info_message("🔧 Enter Custom OpenRouter Model")
     print(f"{Colors.CYAN}You can use any official OpenRouter model name.{Colors.RESET}")
-    print(f"{Colors.CYAN}Examples: openrouter/auto, meta-llama/llama-3.1-70b-instruct, etc.{Colors.RESET}")
-    print(f"{Colors.YELLOW}Visit https://openrouter.ai/models for available models{Colors.RESET}")
+    print(f"{Colors.CYAN}Examples:{Colors.RESET}")
+    print(f"  • openai/gpt-4o")
+    print(f"  • anthropic/claude-3.5-sonnet") 
+    print(f"  • meta-llama/llama-3.1-70b-instruct")
+    print(f"  • google/gemini-2.0-flash-exp")
+    print(f"  • deepseek/deepseek-r1")
+    print(f"  • openrouter/auto (automatic model selection)")
+    print(f"{Colors.YELLOW}Visit https://openrouter.ai/models for all available models{Colors.RESET}")
     print()
     
     while True:
@@ -1219,7 +1225,7 @@ def get_custom_model_name() -> Optional[str]:
             continue
         
         # Basic validation
-        if '/' not in model_name:
+        if '/' not in model_name and model_name != "openrouter/auto":
             print(f"{Colors.YELLOW}Warning: Model names usually contain a provider prefix (e.g., 'openai/gpt-4o'){Colors.RESET}")
             confirm = input(f"Continue with '{model_name}'? (y/N): ").strip().lower()
             if confirm != 'y':
@@ -1458,6 +1464,9 @@ def get_model_description(model: str) -> str:
         # MiniMax
         "MiniMax-Text-01": "MiniMax Text-01 • Latest general model",
         "abab6.5s": "ABAB 6.5S • MiniMax chat model",
+
+        # OpenRouter Custom Models
+        "Other Models": "🔧 Enter custom model name • Any official OpenRouter model",
     }
 
     return model_descriptions.get(model, f"{model} • Standard model")
