@@ -59,6 +59,13 @@ class SecurityConfig:
     validate_file_paths: bool = True
     max_text_length: int = 1000
     command_timeout: int = 30
+    
+    # Command blocking settings (default: disabled for user freedom)
+    enable_command_blocking: bool = False      # Block dangerous commands like 'rm -rf /'
+    enable_confirmation_prompts: bool = False  # Require confirmation for risky commands
+    enable_sudo_warning: bool = False          # Show warning for sudo commands
+    enable_shell_pipe_warning: bool = False    # Show warning for 'curl ... | bash'
+    enable_sandbox: bool = True                # Use sandbox tools (firejail, etc.) when available
 
 
 @dataclass

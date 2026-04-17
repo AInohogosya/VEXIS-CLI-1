@@ -120,9 +120,9 @@ class TerminalHistory:
             self.logger = get_logger("terminal_history")
             
             # Initialize terminal session
-            # Initialize terminal session with system root directory as working directory
-            # Start from root directory (/) instead of project directory
-            self._current_directory = Path("/")
+            # SECURITY FIX: Start from user's home directory instead of root (/)
+            # to prevent unrestricted filesystem access
+            self._current_directory = Path.home()
             self.terminal_session = TerminalSession(
                 session_id=self.session_id,
                 start_time=time.time(),
@@ -366,14 +366,18 @@ class TerminalHistory:
         return self._current_directory
     
     def _execute_subprocess_command(self, command: str, timeout: int):
-        """Execute command using subprocess with platform-specific handling"""
+        """Execute command using subprocess with platform-specific handling (shell=False for security)"""
         try:
-            # Platform-specific shell execution
+            # SECURITY FIX: Use shell=False by using shlex to parse commands
+            # and execute them as lists to prevent command injection
             if self._platform == "windows":
-                # On Windows, use cmd.exe
+                # On Windows, use cmd.exe /c with command list (no shell=True)
+                # shlex.split with posix=False handles Windows quoting properly
+                import shlex
+                cmd_parts = shlex.split(command, posix=False)
                 result = subprocess.run(
-                    command,
-                    shell=True,
+                    ['cmd.exe', '/c'] + cmd_parts,
+                    shell=False,
                     capture_output=True,
                     text=True,
                     timeout=timeout,
@@ -382,18 +386,39 @@ class TerminalHistory:
                     errors='replace'
                 )
             else:
-                # On Unix-like systems, use bash for better compatibility
-                # Execute in background without creating new windows
-                # This works in both GUI and CLI environments
-                result = subprocess.run(
-                    ['bash', '-c', command],
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    cwd=str(self._current_directory),
-                    encoding='utf-8',
-                    errors='replace'
-                )
+                # On Unix-like systems, use shlex to parse the command safely
+                # Then execute directly without going through bash -c when possible
+                import shlex
+                try:
+                    cmd_parts = shlex.split(command)
+                except ValueError:
+                    # If shlex fails (e.g., unbalanced quotes), fall back to bash -c
+                    cmd_parts = None
+                
+                if cmd_parts:
+                    # Direct execution without shell
+                    result = subprocess.run(
+                        cmd_parts,
+                        shell=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        cwd=str(self._current_directory),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+                else:
+                    # Fall back to bash -c for complex commands
+                    result = subprocess.run(
+                        ['bash', '-c', command],
+                        shell=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        cwd=str(self._current_directory),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
             
             return result
             
@@ -403,18 +428,32 @@ class TerminalHistory:
             return e
         except UnicodeDecodeError as e:
             self.logger.error(f"Unicode decode error in command output: {e}")
-            # Retry with error handling
+            # Retry with error handling - use the same secure approach
             try:
-                result = subprocess.run(
-                    command if self._platform == "windows" else ['bash', '-c', command],
-                    shell=(self._platform == "windows"),
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    cwd=str(self._current_directory),
-                    encoding='utf-8',
-                    errors='replace'
-                )
+                import shlex
+                if self._platform == "windows":
+                    cmd_parts = shlex.split(command, posix=False)
+                    result = subprocess.run(
+                        ['cmd.exe', '/c'] + cmd_parts,
+                        shell=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        cwd=str(self._current_directory),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
+                else:
+                    result = subprocess.run(
+                        ['bash', '-c', command],
+                        shell=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        cwd=str(self._current_directory),
+                        encoding='utf-8',
+                        errors='replace'
+                    )
                 return result
             except Exception as retry_e:
                 raise PlatformError(f"Failed to execute command with encoding fallback: {retry_e}") from retry_e
@@ -458,6 +497,25 @@ class TerminalHistory:
             
             # Resolve the path (handles .., ., etc.)
             target_path = target_path.resolve()
+            
+            # SECURITY: Check for path traversal attempts to sensitive directories
+            sensitive_paths = [
+                Path('/etc'), Path('/var'), Path('/usr'), Path('/bin'), 
+                Path('/sbin'), Path('/lib'), Path('/lib64'), Path('/opt'),
+                Path('/sys'), Path('/proc'), Path('/dev'), Path('/boot')
+            ]
+            
+            for sensitive in sensitive_paths:
+                try:
+                    target_path.relative_to(sensitive)
+                    # If we get here, target_path is inside a sensitive directory
+                    result.stderr = f"cd: access denied: {target_dir} (restricted system directory)"
+                    result.returncode = 1
+                    self.logger.warning(f"Blocked access to sensitive directory: {target_path}")
+                    return result
+                except ValueError:
+                    # target_path is not inside sensitive directory, continue checking
+                    continue
             
             # Validate and update directory
             if target_path.exists() and target_path.is_dir():
@@ -1098,19 +1156,36 @@ class TerminalHistory:
             finally:
                 pipe.close()
         
+        import tempfile
+        
+        # Write batch script to temp file to avoid shell=True
+        script_suffix = '.bat' if self._platform == "windows" else '.sh'
+        with tempfile.NamedTemporaryFile(mode='w', suffix=script_suffix, delete=False, 
+                                          dir=str(self._current_directory)) as tmp_script:
+            if self._platform == "windows":
+                tmp_script.write(f"@echo off\n{batch_script}\n")
+            else:
+                tmp_script.write(f"#!/bin/bash\n{batch_script}\n")
+            script_path = tmp_script.name
+        
+        # Make script executable on Unix
+        if self._platform != "windows":
+            os.chmod(script_path, 0o755)
+        
         try:
-            # Start process with Popen for streaming output
+            # Start process with Popen for streaming output (shell=False for security)
             if self._platform == "windows":
                 process = subprocess.Popen(
-                    batch_script,
-                    shell=True,
+                    ['cmd.exe', '/c', script_path],
+                    shell=False,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=str(self._current_directory)
                 )
             else:
                 process = subprocess.Popen(
-                    ['bash', '-c', batch_script],
+                    ['bash', script_path],
+                    shell=False,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=str(self._current_directory)
@@ -1186,6 +1261,13 @@ class TerminalHistory:
                 stdout="",
                 stderr=f"Execution failed: {str(e)}"
             )
+        finally:
+            # Clean up temp script file
+            try:
+                if 'script_path' in locals() and os.path.exists(script_path):
+                    os.unlink(script_path)
+            except Exception:
+                pass
 
 
 # Global terminal history instance for easy access

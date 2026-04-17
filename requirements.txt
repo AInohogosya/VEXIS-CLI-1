@@ -1,4 +1,4 @@
-# Core dependencies for VEXIS-CLI-1.2
+# Core dependencies for VEXIS-CLI-2
 Pillow>=10.0.0
 requests>=2.31.0
 numpy>=1.24.0
@@ -7,6 +7,9 @@ rich>=13.0.0
 
 # YAML configuration support
 PyYAML>=6.0.0
+
+# Plugin system
+pluggy>=1.0.0
 
 # Local model integration
 ollama>=0.1.0

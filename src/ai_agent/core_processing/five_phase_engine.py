@@ -470,10 +470,83 @@ class FivePhaseEngine:
         return bool(re.search(pattern, text, re.DOTALL))
     
     def _has_failure_indicator(self, text: str) -> bool:
-        """Check if text contains the word 'failure' (case-insensitive)"""
+        """
+        Check if text indicates command failure using multiple indicators.
+        
+        Uses weighted scoring based on:
+        - Explicit failure keywords
+        - Error patterns in terminal output
+        - Command exit status indicators
+        - Negative sentiment words
+        
+        Returns True only if failure score exceeds threshold.
+        """
         if not text:
             return False
-        return 'failure' in text.lower()
+        
+        text_lower = text.lower()
+        
+        # Explicit failure indicators (weight: 3)
+        failure_keywords = [
+            'failure', 'failed', 'error occurred', 'unsuccessful',
+            'command failed', 'execution failed', 'task failed'
+        ]
+        
+        # Terminal error patterns (weight: 2)
+        error_patterns = [
+            'exit code:', 'returned non-zero', 'command not found',
+            'permission denied', 'no such file', 'syntax error',
+            'segmentation fault', 'core dumped', 'killed', 'terminated'
+        ]
+        
+        # Negative indicators (weight: 1)
+        negative_indicators = [
+            'error', 'warning', 'abort', 'fatal', 'critical',
+            'cannot', 'unable', 'not found', 'invalid'
+        ]
+        
+        # Success indicators that override failure (weight: -5)
+        success_indicators = [
+            'success', 'completed successfully', 'done', 'finished',
+            'task completed', 'execution successful', 'all commands executed'
+        ]
+        
+        score = 0
+        
+        # Check failure keywords
+        for keyword in failure_keywords:
+            if keyword in text_lower:
+                score += 3
+                self.logger.debug(f"Failure indicator found: '{keyword}' (+3)")
+        
+        # Check error patterns
+        for pattern in error_patterns:
+            if pattern in text_lower:
+                score += 2
+                self.logger.debug(f"Error pattern found: '{pattern}' (+2)")
+        
+        # Check negative indicators
+        for indicator in negative_indicators:
+            if indicator in text_lower:
+                score += 1
+                self.logger.debug(f"Negative indicator found: '{indicator}' (+1)")
+        
+        # Check success indicators (these reduce score)
+        for indicator in success_indicators:
+            if indicator in text_lower:
+                score -= 5
+                self.logger.debug(f"Success indicator found: '{indicator}' (-5)")
+        
+        # Threshold: score >= 3 indicates failure
+        is_failure = score >= 3
+        
+        self.logger.info(f"Failure analysis complete",
+                        score=score,
+                        threshold=3,
+                        is_failure=is_failure,
+                        text_preview=text[:100] + "..." if len(text) > 100 else text)
+        
+        return is_failure
     
     def _extract_all_code_blocks(self, text: str) -> Optional[str]:
         """

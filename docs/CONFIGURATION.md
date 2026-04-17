@@ -94,9 +94,30 @@ logging:
 
 # Security Configuration
 security:
-  # Command Restrictions
-  blacklist_mode: true    # Block dangerous commands
-  whitelist_mode: false   # Only allow safe commands
+  # Command Blocking Settings (NEW in v2.0)
+  # All settings are DISABLED by default for user freedom
+  # Enable these to add safety checks
+  
+  ## Block dangerous commands (rm -rf /, fork bomb, etc.)
+  # Set to true to enable command blocking
+  enable_command_blocking: false
+  
+  ## Require confirmation for risky commands
+  # Set to true to prompt before executing rm -rf, sudo, etc.
+  enable_confirmation_prompts: false
+  
+  ## Show warning for sudo commands
+  enable_sudo_warning: false
+  
+  ## Show warning for pipe-to-shell commands (curl ... | bash)
+  enable_shell_pipe_warning: false
+  
+  ## Use sandbox tools (firejail, bubblewrap) when available
+  enable_sandbox: true
+  
+  # Legacy Settings (for backward compatibility)
+  blacklist_mode: false    # Deprecated: Use enable_command_blocking
+  whitelist_mode: false    # Deprecated
   
   # File System Restrictions
   restricted_paths: [
@@ -343,24 +364,67 @@ logging:
 
 ### Security Configuration
 
-#### Command Restrictions
+#### Command Blocking (New in v2.0)
 
+VEXIS-CLI-2 now offers configurable command blocking. All safety features are **disabled by default** to give users full control.
+
+**Configuration via config.yaml:**
 ```yaml
 security:
-  blacklist_mode: true    # Block dangerous commands
-  whitelist_mode: false   # Only allow safe commands
+  # Enable blocking of dangerous commands (rm -rf /, fork bomb, etc.)
+  enable_command_blocking: false
+  
+  # Require confirmation before executing risky commands
+  enable_confirmation_prompts: false
+  
+  # Show warnings for sudo commands
+  enable_sudo_warning: false
+  
+  # Show warnings for pipe-to-shell (curl | bash)
+  enable_shell_pipe_warning: false
+  
+  # Use sandbox tools when available (firejail, bubblewrap)
+  enable_sandbox: true
 ```
 
-**Blacklisted Commands:**
-- `rm -rf /`
-- `sudo rm`
-- `dd if=/dev/zero`
-- `mkfs`
-- Dangerous system commands
+**Configuration via Environment Variables:**
+```bash
+# Enable command blocking
+export VEXIS_ENABLE_COMMAND_BLOCKING=true
 
-**Whitelisted Commands:**
-- File operations (`ls`, `cp`, `mv`)
-- Text processing (`cat`, `grep`, `sed`)
+# Enable confirmation prompts
+export VEXIS_ENABLE_CONFIRMATION_PROMPTS=true
+
+# Enable sudo warnings
+export VEXIS_ENABLE_SUDO_WARNING=true
+
+# Enable shell pipe warnings
+export VEXIS_ENABLE_SHELL_PIPE_WARNING=true
+
+# Disable sandbox (if needed)
+export VEXIS_ENABLE_SANDBOX=false
+```
+
+**Priority Order:**
+1. Explicit code configuration
+2. Environment variables (VEXIS_*)
+3. config.yaml settings
+4. Defaults (all disabled)
+
+**Blocked Commands (when enabled):**
+- `rm -rf /` - System destruction
+- `rm -rf ~` - Home directory deletion
+- `:(){ :|:& };:` - Fork bomb
+- `dd if=/dev/zero of=/dev/sda` - Disk overwrite
+- `mkfs.ext4 /dev/sdX` - Filesystem format
+- `> /dev/sda` - Disk corruption
+
+**Confirmation Required (when enabled):**
+- `rm -rf` - Recursive delete
+- `sudo` - Privilege escalation
+- `curl ... | bash` - Remote code execution
+- `chmod 777` - Permission changes
+- `kill -9` - Force kill
 - System info (`ps`, `top`, `df`)
 - Network tools (`ping`, `curl`, `wget`)
 
@@ -537,8 +601,12 @@ logging:
   file: "/var/log/vexis/vexis.log"
 
 security:
-  safety_mode: true
-  blacklist_mode: true
+  # Enable command safety features for production
+  enable_command_blocking: true
+  enable_confirmation_prompts: true
+  enable_sudo_warning: true
+  enable_shell_pipe_warning: true
+  enable_sandbox: true
 ```
 
 #### Testing Environment

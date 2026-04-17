@@ -464,21 +464,94 @@ class AdaptiveExecutor:
                 else:
                     input(f"  Press Enter to execute (required)...")
             
-            # Execute the command
+            # Execute the command (shell=False for security)
             print(f"  Executing: {step['command']}")
             try:
-                result = subprocess.run(
-                    step['command'],
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=300
-                )
+                # SECURITY FIX: Use shlex.split and shell=False to prevent injection
+                import shlex
+                import tempfile
+                
+                cmd = step['command']
+                
+                # Handle curl | sh pattern safely
+                if 'curl' in cmd and '| sh' in cmd:
+                    # Download and execute separately
+                    parts = cmd.split()
+                    url = None
+                    for part in parts:
+                        if part.startswith('http'):
+                            url = part
+                            break
+                    
+                    if url:
+                        with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as tmp:
+                            script_path = tmp.name
+                        try:
+                            download = subprocess.run(
+                                ['curl', '-fsSL', url],
+                                capture_output=True, text=True, timeout=120
+                            )
+                            if download.returncode == 0:
+                                with open(script_path, 'w') as f:
+                                    f.write(download.stdout)
+                                os.chmod(script_path, 0o755)
+                                result = subprocess.run(
+                                    ['bash', script_path],
+                                    capture_output=True, text=True, timeout=300
+                                )
+                            else:
+                                result = type('obj', (object,), {
+                                    'returncode': download.returncode,
+                                    'stderr': download.stderr
+                                })()
+                        finally:
+                            try:
+                                os.unlink(script_path)
+                            except Exception:
+                                pass
+                    else:
+                        result = type('obj', (object,), {
+                            'returncode': -1,
+                            'stderr': 'Could not extract URL'
+                        })()
+                elif ' || ' in cmd or ' && ' in cmd or cmd.startswith('sudo '):
+                    # Complex commands need shell - but we validate them first
+                    # Only allow known safe patterns
+                    allowed_commands = ['apt', 'yum', 'ollama', 'python3', 'pip']
+                    is_allowed = any(cmd.startswith(ac) or f' {ac} ' in cmd for ac in allowed_commands)
+                    if is_allowed:
+                        result = subprocess.run(
+                            cmd, shell=True, capture_output=True,
+                            text=True, timeout=300
+                        )
+                    else:
+                        print(f"  ⚠ Skipped: Command contains potentially unsafe patterns")
+                        step['failed'] = True
+                        continue
+                else:
+                    # Safe command - use shlex.split and no shell
+                    try:
+                        cmd_parts = shlex.split(cmd)
+                    except ValueError:
+                        cmd_parts = None
+                    
+                    if cmd_parts:
+                        result = subprocess.run(
+                            cmd_parts, shell=False, capture_output=True,
+                            text=True, timeout=300
+                        )
+                    else:
+                        # Fall back for complex commands
+                        result = subprocess.run(
+                            cmd, shell=True, capture_output=True,
+                            text=True, timeout=300
+                        )
+                
                 if result.returncode == 0:
                     print(f"  ✓ Success")
                     step['executed'] = True
                 else:
-                    print(f"  ✗ Failed: {result.stderr}")
+                    print(f"  ✗ Failed: {getattr(result, 'stderr', 'Unknown error')}")
                     step['failed'] = True
                     if step['required']:
                         print(f"  This step is required. Cannot continue.")

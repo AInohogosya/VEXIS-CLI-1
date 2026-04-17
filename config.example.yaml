@@ -1,0 +1,91 @@
+# VEXIS-CLI-2 Configuration Example
+# Copy this file to config.yaml and customize as needed
+
+# AI Provider Configuration
+api:
+  # Primary provider: ollama, groq, google, openai, anthropic, xai, meta, mistral, microsoft, amazon, cohere, deepseek, together
+  preferred_provider: "ollama"
+  
+  # Ollama (local) settings
+  local_endpoint: "http://localhost:11434"
+  local_model: "llama3.2:latest"
+  
+  # Timeout settings
+  timeout: 30
+  max_retries: 3
+
+# Security Configuration (All features DISABLED by default)
+security:
+  # NEW in v2.0: Command blocking settings
+  # Set to true to enable safety features
+  
+  # Block dangerous commands (rm -rf /, fork bomb, etc.)
+  enable_command_blocking: false
+  
+  # Require confirmation before executing risky commands (rm -rf, sudo, etc.)
+  enable_confirmation_prompts: false
+  
+  # Show warning for sudo commands
+  enable_sudo_warning: false
+  
+  # Show warning for pipe-to-shell commands (curl ... | bash)
+  enable_shell_pipe_warning: false
+  
+  # Use sandbox tools (firejail, bubblewrap, nsjail) when available
+  enable_sandbox: true
+  
+  # Legacy settings (deprecated, do not use)
+  # blacklist_mode: false
+  # whitelist_mode: false
+
+# Execution Configuration
+execution:
+  # Safety settings
+  safety_mode: true          # Enable general safety checks
+  dry_run: false             # Show commands without executing
+  verify_commands: true      # Validate commands before execution
+  
+  # Timeouts
+  command_timeout: 30        # seconds per command
+  task_timeout: 300          # seconds per task
+  
+  # Retry settings
+  max_iterations: 10         # max phase 2-4 loops
+  auto_recovery: true        # auto-retry on failure
+
+# Logging Configuration
+logging:
+  level: "INFO"              # DEBUG, INFO, WARNING, ERROR
+  file: "vexis.log"          # log file path (optional)
+  json_format: false         # structured JSON logging
+  console: true              # output to console
+  
+# Cache Configuration (NEW in v2.0)
+cache:
+  enabled: true              # enable prompt caching
+  max_size: 1000             # max cached entries
+  ttl: 3600                  # cache TTL in seconds (1 hour)
+  persist_to_disk: true      # save cache between sessions
+
+# Cost Management (NEW in v2.0)
+cost:
+  # Budget limits (in USD)
+  daily_budget: null         # e.g., 10.0 for $10/day
+  monthly_budget: null       # e.g., 100.0 for $100/month
+  per_request_budget: null   # e.g., 0.50 for 50 cents/request
+  
+  # Alerts
+  warning_threshold: 0.8     # alert at 80% of budget
+  critical_threshold: 0.95   # alert at 95% of budget
+
+# Performance Configuration
+performance:
+  max_concurrent_tasks: 1
+  memory_limit_mb: 1024
+
+# User Preferences
+user:
+  name: ""
+  preferred_style: "detailed"  # concise, detailed, friendly
+  auto_confirm: false
+  show_progress: true

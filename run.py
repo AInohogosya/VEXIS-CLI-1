@@ -480,23 +480,54 @@ def run_environment_check(fix_mode=False):
 def update_ollama():
     """Update Ollama to latest version"""
     from ai_agent.utils.interactive_menu import Colors, success_message, error_message, warning_message
+    import tempfile
     
     print(f"{Colors.CYAN}Updating Ollama...{Colors.RESET}")
     try:
-        # Download and run install script
-        result = subprocess.run(
-            "curl -fsSL https://ollama.com/install.sh | sh",
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=300
-        )
-        if result.returncode == 0:
-            success_message("Ollama updated successfully")
-            return True
-        else:
-            error_message(f"Ollama update failed: {result.stderr}")
-            return False
+        # Create a temporary file for the install script
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as tmp_script:
+            script_path = tmp_script.name
+        
+        try:
+            # Step 1: Download the install script using curl (without shell)
+            download_result = subprocess.run(
+                ['curl', '-fsSL', 'https://ollama.com/install.sh'],
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            
+            if download_result.returncode != 0:
+                error_message(f"Failed to download Ollama install script: {download_result.stderr}")
+                return False
+            
+            # Write script to temp file
+            with open(script_path, 'w') as f:
+                f.write(download_result.stdout)
+            
+            # Make script executable
+            os.chmod(script_path, 0o755)
+            
+            # Step 2: Execute the downloaded script with bash (without shell=True)
+            result = subprocess.run(
+                ['bash', script_path],
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            
+            if result.returncode == 0:
+                success_message("Ollama updated successfully")
+                return True
+            else:
+                error_message(f"Ollama update failed: {result.stderr}")
+                return False
+        finally:
+            # Clean up temp file
+            try:
+                os.unlink(script_path)
+            except Exception:
+                pass
     except Exception as e:
         error_message(f"Error updating Ollama: {e}")
         return False

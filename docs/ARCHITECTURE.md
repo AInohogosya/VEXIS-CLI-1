@@ -2,51 +2,101 @@
 
 ## Overview
 
-VEXIS-CLI-2 is built on a 5-phase pipeline execution engine that processes natural language instructions and executes terminal operations with intelligent error handling and recovery mechanisms.
+VEXIS-CLI-2 is built on a **5-Phase Pipeline Architecture** that processes natural language instructions through intelligent command generation, execution, evaluation, and summarization with robust error handling and recovery mechanisms.
 
 ## Core Architecture
 
-### Two-Phase Execution Engine
+### 5-Phase Pipeline Execution Engine
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    VEXIS-CLI-2 System                       │
-├─────────────────────────────────────────────────────────────┤
-│  Phase 1: Command Suggestion                              │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │ Natural Language │  │ Command Parser  │  │ Task Planner │ │
-│  │    Processing   │  │                 │  │              │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│  Phase 2: Command Extraction                              │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │ Command Executor│  │ Error Handler   │  │ Task Verifier│ │
-│  │                 │  │                 │  │              │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│  AI Provider Layer                                         │
-│  ┌─────────────────┐  ┌─────────────────┐                  │
-│  │   Ollama        │  │  Google Gemini  │                  │
-│  │   Integration   │  │   Integration   │                  │
-│  └─────────────────┘  └─────────────────┘                  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         VEXIS-CLI-2 5-Phase System                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Phase 1: Command Suggestion                                           │ │
+│  │ ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐       │ │
+│  │ │ User Prompt  │───▶│ AI Analysis  │───▶│ Command Strategy │       │ │
+│  │ └──────────────┘    └──────────────┘    └──────────────────┘       │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Phase 2: Command Extraction                                           │ │
+│  │ ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐       │ │
+│  │ │ Parse Plan   │───▶│ Extract Cmds │───▶│ Validate Syntax  │       │ │
+│  │ └──────────────┘    └──────────────┘    └──────────────────┘       │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Phase 3: Command Execution                                          │ │
+│  │ ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐       │ │
+│  │ │ Terminal     │───▶│ Execute      │───▶│ Capture Output   │       │ │
+│  │ │ Injection    │    │ Batch        │    │ & Logs           │       │ │
+│  │ └──────────────┘    └──────────────┘    └──────────────────┘       │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Phase 4: Log Evaluation                                               │ │
+│  │ ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐       │ │
+│  │ │ Analyze      │───▶│ Detect       │───▶│ Decide: Continue │       │ │
+│  │ │ Output       │    │ Errors       │    │ or Complete      │       │ │
+│  │ └──────────────┘    └──────────────┘    └──────────────────┘       │ │
+│  │                                                                       │ │
+│  │         ┌───────────────────────────────────────────┐                  │ │
+│  │         │ Contains "failure"?                       │                  │ │
+│  │         │ Yes: Loop to Phase 2  │  No: Proceed to Phase 5            │ │
+│  │         └───────────────────────────────────────────┘                  │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                        │
+│                                    ▼                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │ Phase 5: Summary Generation                                           │ │
+│  │ ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐       │ │
+│  │ │ Full Log     │───▶│ AI Summary   │───▶│ User Report      │       │ │
+│  │ │ History      │    │ Generation   │    │ Display          │       │ │
+│  │ └──────────────┘    └──────────────┘    └──────────────────┘       │ │
+│  └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  AI Provider Layer (16+ Providers)                                         │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │
+│  │ Ollama  │ │ Google  │ │ OpenAI  │ │ Anthro  │ │ Groq    │ │ xAI     │  │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘  │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │
+│  │ Meta    │ │ Mistral │ │ Azure   │ │ AWS     │ │ Cohere  │ │DeepSeek │  │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘  │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐                          │
+│  │Together │ │ MiniMax │ │ ZhipuAI │ │OpenRoutr│                          │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘                          │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Architecture
 
-### 1. TwoPhaseEngine (`src/ai_agent/core_processing/two_phase_engine.py`)
+### 1. FivePhaseEngine (`src/ai_agent/core_processing/five_phase_engine.py`)
 
 **Responsibilities:**
-- Orchestrates the two-phase execution process
-- Manages command planning and execution phases
-- Handles phase transitions and state management
-- Implements error recovery strategies
+- Orchestrates the complete 5-phase pipeline execution
+- Phase 1: Command Suggestion - AI analyzes intent and suggests approach
+- Phase 2: Command Extraction - Precise command isolation and validation
+- Phase 3: Command Execution - Safe terminal execution with monitoring
+- Phase 4: Log Evaluation - Intelligent error analysis and retry logic
+- Phase 5: Summary Generation - Comprehensive result reporting
+- Manages Phase 2-4 iteration loop for error recovery
+- Handles phase transitions and state management via `PipelineContext`
+- Implements intelligent error recovery with max 10 iterations
 
 **Key Methods:**
 ```python
-async def process_instruction(self, instruction: str) -> CommandResult
-async def plan_commands(self, instruction: str) -> List[Command]
-async def execute_commands(self, commands: List[Command]) -> ExecutionResult
+def execute_instruction(self, user_prompt: str) -> PipelineContext
+def _run_phase1(self, context: PipelineContext) -> bool  # Command Suggestion
+def _run_phase2(self, context: PipelineContext) -> bool  # Command Extraction
+def _run_phase3(self, context: PipelineContext) -> bool  # Command Execution
+def _run_phase4(self, context: PipelineContext) -> bool  # Log Evaluation
+def _run_phase5(self, context: PipelineContext) -> bool  # Summary Generation
 ```
 
 ### 2. ModelRunner (`src/ai_agent/external_integration/model_runner.py`)
