@@ -1,0 +1,9 @@
+model_settings:
+provider: "OpenAI"
+model_name: "gpt-4-turbo"
+api_key: "YOUR_API_KEY"
+telegram_settings:
+bot_token: "YOUR_BOT_TOKEN"
+user_id: "YOUR_USER_ID"
+system_settings:
+log_limit: 100
