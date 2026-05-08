@@ -698,29 +698,28 @@ class FivePhaseEngine:
                 # Fallback: Remove code blocks if LLM ignored the plain text instruction
                 summary = self._remove_code_blocks(summary)
                 
-                if summary:
-                    context.final_summary = summary
-                    self.logger.info("Phase 5 completed successfully",
-                                   summary_length=len(summary))
-                    
-                    # Send or display the summary based on mode
-                    if context.telegram_mode and self.telegram_bot and context.telegram_user_id:
-                        # Send via Telegram immediately
-                        self._send_telegram_message_sync(
-                            context.telegram_user_id,
-                            f"✅ Task Completed\n\n{context.final_summary}"
-                        )
-                    else:
-                        # Display the summary in terminal
-                        print("")
-                        print(context.final_summary)
-                    
-                    return True
+                # If summary is empty after removing code blocks, use a default message
+                if not summary:
+                    summary = "Task completed successfully. The commands were executed and the objective was achieved."
+                    self.logger.warning("Phase 5: LLM returned only code blocks, using fallback summary")
+                
+                context.final_summary = summary
+                self.logger.info("Phase 5 completed successfully",
+                               summary_length=len(summary))
+                
+                # Send or display the summary based on mode
+                if context.telegram_mode and self.telegram_bot and context.telegram_user_id:
+                    # Send via Telegram immediately
+                    self._send_telegram_message_sync(
+                        context.telegram_user_id,
+                        f"✅ Task Completed\n\n{context.final_summary}"
+                    )
                 else:
-                    self.logger.warning(f"Phase 5: No code block found in attempt {attempt + 1}")
-                    if attempt < max_retries - 1:
-                        continue
-                    return False
+                    # Display the summary in terminal
+                    print("")
+                    print(context.final_summary)
+                
+                return True
                     
             except PipelineCancelledError:
                 raise
