@@ -93,7 +93,7 @@ class OpenRouterProvider:
             settings = get_settings_manager()
             self.api_key = settings.get_openrouter_api_key()
             return self.api_key
-        except:
+        except (ImportError, Exception):
             return None
         
     @property

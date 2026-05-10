@@ -147,7 +147,6 @@ class CommandParser:
             cleaned = cleaned[:-3].strip()
         
         # Remove line number prefixes like "Line 3:", "Line 1:", etc.
-        import re
         line_number_pattern = r'^Line \d+:\s*'
         if re.match(line_number_pattern, cleaned, re.IGNORECASE):
             cleaned = re.sub(line_number_pattern, '', cleaned, flags=re.IGNORECASE)

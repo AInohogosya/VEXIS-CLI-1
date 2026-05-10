@@ -534,7 +534,7 @@ class DependencyChecker:
                         distro = "redhat"
                     else:
                         distro = "unknown"
-            except:
+            except (FileNotFoundError, IOError):
                 distro = "unknown"
             
             if distro in self.system_packages["linux"]:
@@ -546,7 +546,7 @@ class DependencyChecker:
                             results[package] = (True, f"{package} ✓")
                         else:
                             results[package] = (False, f"{package} ✗")
-                    except:
+                    except (subprocess.SubprocessError, FileNotFoundError):
                         results[package] = (False, f"{package} ✗")
         
         elif current_platform == "darwin":
@@ -557,7 +557,7 @@ class DependencyChecker:
                         results[package] = (True, f"{package} ✓")
                     else:
                         results[package] = (False, f"{package} ✗")
-                except:
+                except (subprocess.SubprocessError, FileNotFoundError):
                     results[package] = (False, f"{package} ✗")
         
         return results

@@ -3,16 +3,53 @@
 
 # AI Provider Configuration
 api:
-  # Primary provider: ollama, groq, google, openai, anthropic, xai, meta, mistral, microsoft, amazon, cohere, deepseek, together
+  # Primary provider: ollama, groq, google, openai, anthropic, xai, meta, mistral, microsoft, amazon, cohere, deepseek, together, minimax, zhipuai, openrouter
   preferred_provider: "ollama"
+  
+  # API Keys (Set via environment variables for security)
+  # Or configure here: google: "", groq: "", openai: "", anthropic: "", xai: "", meta: "", mistral: "", microsoft: "", cohere: "", deepseek: "", together: "", minimax: "", zhipuai: "", openrouter: ""
+  api_keys:
+    google: ""
+    groq: ""
+    openai: ""
+    anthropic: ""
+    xai: ""
+    meta: ""
+    mistral: ""
+    microsoft: ""
+    cohere: ""
+    deepseek: ""
+    together: ""
+    minimax: ""
+    zhipuai: ""
+    openrouter: ""
   
   # Ollama (local) settings
   local_endpoint: "http://localhost:11434"
-  local_model: "llama3.2:latest"
+  local_model: "llama3.2:3b"
+  
+  # Model configurations
+  models:
+    ollama: "llama3.2:3b"
+    google: "gemini-3.1-pro-preview"
+    groq: "llama-3.3-70b-versatile"
+    openai: "gpt-4o"
+    anthropic: "claude-3.5-sonnet-20241022"
+    xai: "grok-2"
+    meta: "llama-3.1-70b-instruct"
+    mistral: "mistral-large-latest"
+    microsoft: "gpt-4o"
+    amazon: "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    cohere: "command-r-plus"
+    deepseek: "deepseek-chat"
+    together: "meta-llama/Llama-3.1-70B-Instruct-Turbo"
+    minimax: "minimax-text-01"
+    zhipuai: "glm-4"
+    openrouter: "openai/gpt-oss-120b"
   
   # Timeout settings
-  timeout: 30
-  max_retries: 3
+  timeout: 131400
+  max_retries: 7
 
 # Security Configuration (All features DISABLED by default)
 security:
@@ -40,9 +77,6 @@ security:
 
 # Execution Configuration
 execution:
-  # Execution mode: "auto" (ask on startup), "normal", or "telegram"
-  mode: "auto"
-  
   # Safety settings
   safety_mode: true          # Enable general safety checks
   dry_run: false             # Show commands without executing
@@ -50,14 +84,11 @@ execution:
   
   # Timeouts
   command_timeout: 30        # seconds per command
-  task_timeout: 7200         # seconds per task (120 minutes)
+  task_timeout: 2700         # seconds per task (45 minutes)
   
   # Retry settings
   max_iterations: 500         # max phase 2-4 loops
   auto_recovery: true        # auto-retry on failure
-  
-  # Phase 2 summarization
-  enable_phase2_summarization: true  # Enable summarization of Phase 2 input (Phase 4 output or Phase 1 output)
 
 # Logging Configuration
 logging:
@@ -100,7 +131,21 @@ user:
 telegram:
   enabled: false              # Enable Telegram bot mode
   bot_token: ""               # Telegram bot token from @BotFather
-  allowed_user_ids: []        # List of allowed Telegram user IDs (empty = allow all)
+  bot_username: ""            # Telegram bot username
+  api_id: 0                   # Telegram API ID
+  api_hash: ""                # Telegram API hash
+  session_name: "vexis_telegram"  # Session name for Telegram client
+  
+  # Contacts configuration (replace with your own)
+  contacts: []                # List of contacts with name, phone, telegram fields
+  
+  # Authorization settings
+  authorized_users: []        # List of authorized user IDs
+  output_recipients: []       # List of recipients for output
+  
+  # Feature settings
+  enable_input_listener: true # Enable Telegram input listener
+  send_phase2_end_updates: true # Send updates when Phase 2 ends
   max_history_length: 50      # Maximum number of conversation history entries to keep
 
 # Custom System Prompts (NEW in v2.2)

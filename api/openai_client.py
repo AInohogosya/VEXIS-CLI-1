@@ -578,7 +578,7 @@ class OpenAILLMClient(BaseLLM):
             
             try:
                 encoding = tiktoken.get_encoding(encoding_name)
-            except:
+            except (KeyError, ValueError):
                 encoding = tiktoken.encoding_for_model(model_id)
             
             return len(encoding.encode(text))

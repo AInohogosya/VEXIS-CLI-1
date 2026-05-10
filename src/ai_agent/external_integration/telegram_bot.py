@@ -426,14 +426,15 @@ class TelegramBotManager:
             self.logger.info(f"Task for user {user_id} cancelled - switching to new task")
             try:
                 await processing_msg.edit_text("🔄 Task cancelled - processing new request...")
-            except:
-                pass
+            except Exception as e:
+                self.logger.error(f"Error editing message: {e}")
             raise
         except Exception as e:
             self.logger.error(f"Error processing message: {e}")
             try:
                 await processing_msg.edit_text(f"❌ Error processing your request: {str(e)}")
-            except:
+            except Exception as e:
+                self.logger.error(f"Error editing message: {e}")
                 pass
         finally:
             # Clean up task reference

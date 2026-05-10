@@ -56,7 +56,7 @@ class SimpleOllamaProvider:
                 import subprocess
                 result = subprocess.run(["ollama", "whoami"], capture_output=True, text=True, timeout=5)
                 is_signed_in = result.returncode == 0 and result.stdout.strip()
-            except:
+            except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
                 is_signed_in = False
             
             if not is_signed_in:
@@ -319,5 +319,5 @@ class SimpleOllamaProvider:
         try:
             response = requests.get(f"{self.endpoint}/api/tags", timeout=5)
             return response.status_code == 200
-        except:
+        except (requests.RequestException, TimeoutError):
             return False

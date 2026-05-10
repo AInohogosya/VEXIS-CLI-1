@@ -72,16 +72,6 @@ def _get_api_key_for_provider(provider: Optional[str]) -> Optional[str]:
             api_key = getattr(settings_manager, method_name)()
             if api_key:
                 return api_key
-
-        if provider == "microsoft" and hasattr(settings_manager, "get_microsoft_api_key"):
-            api_key = settings_manager.get_microsoft_api_key()
-            if api_key:
-                return api_key
-
-        if provider == "amazon" and hasattr(settings_manager, "get_amazon_access_key"):
-            api_key = settings_manager.get_amazon_access_key()
-            if api_key:
-                return api_key
     except Exception:
         pass
 
@@ -792,7 +782,9 @@ def show_config_summary(provider: str, model: str = None):
         "mistral": ("Mistral Official API", model or settings_manager.get_mistral_model()),
         "amazon": ("Amazon Bedrock API", model or settings_manager.get_amazon_model()),
         "cohere": ("Cohere Official API", model or settings_manager.get_cohere_model()),
-        "minimax": ("MiniMax Official API", model or settings_manager.get_minimax_model())
+        "minimax": ("MiniMax Official API", model or settings_manager.get_minimax_model()),
+        "zhipuai": ("ZhipuAI Official API", model or settings_manager.get_zhipuai_model()),
+        "openrouter": ("OpenRouter Official API", model or settings_manager.get_openrouter_model())
     }
     
     if provider in provider_info:
@@ -1587,10 +1579,10 @@ def select_openai_model_with_categories(models: list) -> Optional[str]:
     # Add Legacy Models category (all legacy models in one category)
     if legacy_models:
         menu.add_item(
-            "� Legacy Models",
+            "📚 Legacy Models",
             f"Older models organized by type ({len(legacy_models)} models)",
             "category_legacy",
-            "�"
+            "📚"
         )
     
     selected_category = menu.show()

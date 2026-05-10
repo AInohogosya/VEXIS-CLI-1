@@ -94,7 +94,7 @@ class FallbackInteractiveMenu:
         try:
             # Universal detection that works in all terminals
             return self._universal_get_key()
-        except Exception:
+        except Exception as e:
             # Fallback to simple input
             return self._fallback_input()
     
@@ -139,7 +139,7 @@ class FallbackInteractiveMenu:
             
             return ''
             
-        except Exception:
+        except Exception as e:
             return ''
     
     def _fallback_input(self) -> str:
@@ -152,7 +152,9 @@ class FallbackInteractiveMenu:
                 return choice
             else:
                 return ''  # Invalid input
-        except:
+        except (EOFError, KeyboardInterrupt):
+            return ''
+        except Exception as e:
             return ''
     
     def display_menu(self):
@@ -227,13 +229,13 @@ class FallbackInteractiveMenu:
                             self.current_index = num - 1
                             if old_index != self.current_index:
                                 self.display_menu()  # Redisplay entire menu
-                    except:
+                    except Exception as e:
                         pass
                     
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             print("\033[2J\033[H", end="", flush=True)
             return None
-        except Exception:
+        except Exception as e:
             return self.fallback_selection()
     
     def fallback_selection(self) -> Optional[Any]:

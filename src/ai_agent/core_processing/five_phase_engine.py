@@ -8,6 +8,7 @@ Phase 4: Log Evaluation and Re-execution Decision
 Phase 5: Summary Generation and Display
 """
 
+import os
 import re
 import time
 import platform
@@ -932,14 +933,12 @@ class FivePhaseEngine:
         """Destructor to ensure cleanup"""
         try:
             self.cleanup()
-        except:
+        except Exception:
             pass
     
     def _get_os_info(self) -> str:
         """Get OS information for CLI context"""
         try:
-            import os
-            
             system = platform.system()
             release = platform.release()
             version = platform.version()
@@ -961,7 +960,7 @@ class FivePhaseEngine:
                     distro_name = distro_info.get('NAME', 'Unknown Linux')
                     distro_version = distro_info.get('VERSION', '')
                     os_info = f"{distro_name} {distro_version} ({system} {release} {machine})"
-                except:
+                except (FileNotFoundError, KeyError, ValueError):
                     os_info = f"Linux {release} {machine}"
             
             elif system == "Darwin":

@@ -32,7 +32,6 @@ class APISettings:
     zhipuai_api_key: Optional[str] = None
     openrouter_api_key: Optional[str] = None
     preferred_provider: str = "ollama"  # Must be explicitly set by user
-    save_api_key: bool = True
     google_model: str = "gemini-3.1-pro-preview"
     groq_model: str = "llama-3.3-70b-versatile"
     openai_model: str = "gpt-5.4"
@@ -71,22 +70,19 @@ class SettingsManager:
         """Get current settings"""
         return self._settings
     
-    def set_google_api_key(self, api_key: str, save_key: bool = True):
+    def set_google_api_key(self, api_key: str):
         """Set Google API key"""
         self._settings.google_api_key = api_key
-        self._settings.save_api_key = save_key
         self.logger.info("Google API key updated")
     
-    def set_groq_api_key(self, api_key: str, save_key: bool = True):
+    def set_groq_api_key(self, api_key: str):
         """Set Groq API key"""
         self._settings.groq_api_key = api_key
-        self._settings.save_api_key = save_key
         self.logger.info("Groq API key updated")
     
-    def set_openai_api_key(self, api_key: str, save_key: bool = True):
+    def set_openai_api_key(self, api_key: str):
         """Set OpenAI API key"""
         self._settings.openai_api_key = api_key
-        self._settings.save_api_key = save_key
         self.logger.info("OpenAI API key updated")
     
     def get_google_api_key(self) -> Optional[str]:
@@ -127,10 +123,9 @@ class SettingsManager:
         """Check if OpenAI API key is available"""
         return bool(self._settings.openai_api_key)
     
-    def set_anthropic_api_key(self, api_key: str, save_key: bool = True):
+    def set_anthropic_api_key(self, api_key: str):
         """Set Anthropic API key"""
         self._settings.anthropic_api_key = api_key
-        self._settings.save_api_key = save_key
         self.logger.info("Anthropic API key updated")
     
     def get_anthropic_api_key(self) -> Optional[str]:
@@ -196,9 +191,8 @@ class SettingsManager:
         return self._settings.ollama_model
     
     # xAI methods
-    def set_xai_api_key(self, api_key: str, save_key: bool = True):
+    def set_xai_api_key(self, api_key: str):
         self._settings.xai_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_xai_api_key(self) -> Optional[str]:
         return self._settings.xai_api_key
@@ -213,9 +207,8 @@ class SettingsManager:
         return self._settings.xai_model
     
     # Meta methods
-    def set_meta_api_key(self, api_key: str, save_key: bool = True):
+    def set_meta_api_key(self, api_key: str):
         self._settings.meta_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_meta_api_key(self) -> Optional[str]:
         return self._settings.meta_api_key
@@ -230,9 +223,8 @@ class SettingsManager:
         return self._settings.meta_model
     
     # Mistral methods
-    def set_mistral_api_key(self, api_key: str, save_key: bool = True):
+    def set_mistral_api_key(self, api_key: str):
         self._settings.mistral_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_mistral_api_key(self) -> Optional[str]:
         return self._settings.mistral_api_key
@@ -247,9 +239,8 @@ class SettingsManager:
         return self._settings.mistral_model
     
     # Microsoft/Azure methods
-    def set_microsoft_api_key(self, api_key: str, save_key: bool = True):
+    def set_microsoft_api_key(self, api_key: str):
         self._settings.microsoft_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_microsoft_api_key(self) -> Optional[str]:
         return self._settings.microsoft_api_key
@@ -264,10 +255,9 @@ class SettingsManager:
         return self._settings.microsoft_model
     
     # Amazon/Bedrock methods
-    def set_amazon_credentials(self, access_key: str, secret_key: str, save_key: bool = True):
+    def set_amazon_credentials(self, access_key: str, secret_key: str):
         self._settings.amazon_access_key = access_key
         self._settings.amazon_secret_key = secret_key
-        self._settings.save_api_key = save_key
     
     def get_amazon_access_key(self) -> Optional[str]:
         return self._settings.amazon_access_key
@@ -285,9 +275,8 @@ class SettingsManager:
         return self._settings.amazon_model
     
     # Cohere methods
-    def set_cohere_api_key(self, api_key: str, save_key: bool = True):
+    def set_cohere_api_key(self, api_key: str):
         self._settings.cohere_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_cohere_api_key(self) -> Optional[str]:
         return self._settings.cohere_api_key
@@ -302,9 +291,8 @@ class SettingsManager:
         return self._settings.cohere_model
     
     # DeepSeek methods
-    def set_deepseek_api_key(self, api_key: str, save_key: bool = True):
+    def set_deepseek_api_key(self, api_key: str):
         self._settings.deepseek_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_deepseek_api_key(self) -> Optional[str]:
         return self._settings.deepseek_api_key
@@ -319,9 +307,8 @@ class SettingsManager:
         return self._settings.deepseek_model
     
     # Together AI methods
-    def set_together_api_key(self, api_key: str, save_key: bool = True):
+    def set_together_api_key(self, api_key: str):
         self._settings.together_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_together_api_key(self) -> Optional[str]:
         return self._settings.together_api_key
@@ -336,9 +323,8 @@ class SettingsManager:
         return self._settings.together_model
     
     # MiniMax methods
-    def set_minimax_api_key(self, api_key: str, save_key: bool = True):
+    def set_minimax_api_key(self, api_key: str):
         self._settings.minimax_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_minimax_api_key(self) -> Optional[str]:
         return self._settings.minimax_api_key
@@ -353,9 +339,8 @@ class SettingsManager:
         return self._settings.minimax_model
     
     # ZhipuAI methods
-    def set_zhipuai_api_key(self, api_key: str, save_key: bool = True):
+    def set_zhipuai_api_key(self, api_key: str):
         self._settings.zhipuai_api_key = api_key
-        self._settings.save_api_key = save_key
     
     def get_zhipuai_api_key(self) -> Optional[str]:
         return self._settings.zhipuai_api_key
@@ -379,10 +364,9 @@ class SettingsManager:
         self._settings.preferred_provider = provider
         self.logger.info(f"Preferred provider set to: {provider}")
     
-    def set_openrouter_api_key(self, api_key: str, save_key: bool = True):
+    def set_openrouter_api_key(self, api_key: str):
         """Set OpenRouter API key"""
         self._settings.openrouter_api_key = api_key
-        self._settings.save_api_key = save_key
         self.logger.info("OpenRouter API key updated")
     
     def get_openrouter_api_key(self) -> Optional[str]:
@@ -408,7 +392,7 @@ class SettingsManager:
         """Get OpenRouter model"""
         return self._settings.openrouter_model
     
-    def set_api_key(self, provider: str, api_key: str, save_key: bool = True):
+    def set_api_key(self, provider: str, api_key: str):
         """Generic API key setter for any provider"""
         provider_key_map = {
             "google": "google_api_key",
@@ -432,7 +416,6 @@ class SettingsManager:
             raise ValueError(f"Unknown provider: {provider}")
         
         setattr(self._settings, provider_key_map[provider], api_key)
-        self._settings.save_api_key = save_key
         self.logger.info(f"{provider.title()} API key updated")
     
     def set_model(self, provider: str, model: str):
