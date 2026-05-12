@@ -49,7 +49,7 @@ def test_foreground_batch_command_respects_timeout(tmp_path):
 def test_execution_config_timeout_values_are_loaded_from_example_config():
     config = load_config("config.example.yaml", force_reload=True)
 
-    assert config.execution.command_timeout == 30
+    assert config.execution.command_timeout == 1800
     assert config.execution.task_timeout == 7200
     assert config.execution.max_iterations == 500
 

@@ -181,7 +181,7 @@ api:
 
 # 5-Phase Engine Configuration
 engine:
-  command_timeout: 30
+  command_timeout: 1800
   task_timeout: 7200  # 120 minutes
   max_iterations: 500
   enable_phase_logging: false

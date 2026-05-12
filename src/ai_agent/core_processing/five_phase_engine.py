@@ -94,7 +94,7 @@ class FivePhaseEngine:
         
         # Configuration
         self.max_iterations = self.config.get("max_iterations", 500)
-        self.command_timeout = self.config.get("command_timeout", 30)
+        self.command_timeout = self.config.get("command_timeout", 1800)
         self.task_timeout = self.config.get("task_timeout", 7200)
         self.enable_phase2_summarization = self.config.get("enable_phase2_summarization", True)
         self._active_cancel_event: Optional[threading.Event] = None

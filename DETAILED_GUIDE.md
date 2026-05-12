@@ -86,7 +86,7 @@ verification:
   max_verification_attempts: 3  # Max verification tries
 
 engine:
-  command_timeout: 30  # Command execution timeout
+  command_timeout: 1800  # Command execution timeout (30 minutes)
   task_timeout: 7200  # Overall task timeout (120 minutes)
   max_task_retries: 3  # Maximum task retries
 ```

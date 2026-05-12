@@ -225,7 +225,7 @@ class ConfigManager:
         self._raw_config = {
             "logging": {"level": "INFO", "console": True},
             "api": {"timeout": 30, "max_retries": 3},
-            "security": {"command_timeout": 30},
+            "security": {"command_timeout": 1800},
             "performance": {"max_concurrent_tasks": 1},
             "engine": {"click_delay": 0.1, "typing_delay": 0.05},
         }

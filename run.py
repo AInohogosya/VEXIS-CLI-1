@@ -2219,7 +2219,7 @@ def main():
         options = {
             "debug": debug_mode,
             "max_iterations": max_iterations,
-            "command_timeout": 30,
+            "command_timeout": 1800,
             "task_timeout": 7200,  # 120 minutes
             "telegram_mode": selected_mode == "telegram"
         }
