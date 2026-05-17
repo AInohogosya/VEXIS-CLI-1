@@ -9,17 +9,17 @@ from .fallback_interactive_menu import FallbackInteractiveMenu
 from .main import get_yellow_menu, get_yellow_selector, show_yellow_selection_demo
 
 __all__ = [
-    'CleanInteractiveMenu',
-    'Colors', 
-    'success_message',
-    'error_message', 
-    'warning_message',
-    'get_clean_selector',
-    'CleanHierarchicalSelector',
-    'get_yellow_menu',
-    'get_yellow_selector',
-    'show_yellow_selection_demo',
-    'FallbackInteractiveMenu'
+		'CleanInteractiveMenu',
+		'Colors',
+		'success_message',
+		'error_message',
+		'warning_message',
+		'get_clean_selector',
+		'CleanHierarchicalSelector',
+		'get_yellow_menu',
+		'get_yellow_selector',
+		'show_yellow_selection_demo',
+		'FallbackInteractiveMenu'
 ]
 
 __version__ = "1.0.0"

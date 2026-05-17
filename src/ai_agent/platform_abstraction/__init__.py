@@ -6,5 +6,5 @@ Cross-platform detection and system information
 from .platform_detector import PlatformDetector
 
 __all__ = [
-    "PlatformDetector",
+		"PlatformDetector",
 ]

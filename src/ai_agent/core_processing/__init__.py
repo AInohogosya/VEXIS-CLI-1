@@ -7,6 +7,6 @@ from .command_parser import CommandParser
 from .five_phase_engine import FivePhaseEngine
 
 __all__ = [
-    "CommandParser", 
-    "FivePhaseEngine",
+		"CommandParser",
+		"FivePhaseEngine",
 ]
