@@ -255,12 +255,12 @@ class TelegramBotManager:
             return
         
         await update.message.reply_text(
-            "🤖 VEXIS-CLI AI Agent\n\n"
-            "Send me commands and I'll execute them on your computer.\n"
-            "Use /reset to clear conversation history.\n"
-            "Use /restart to restart while keeping current settings.\n"
-            "Use /help for more information."
-        )
+                    "VEXIS-CLI AI Agent\n\n"
+                    "Send me commands and I'll execute them on your computer.\n"
+                    "Use /reset to clear conversation history.\n"
+                    "Use /restart to restart while keeping current settings.\n"
+                    "Use /help for more information."
+                )
     
     @retry_on_network_error(max_retries=10, initial_delay=1.0, backoff_factor=2.0)
     async def reset_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -281,7 +281,7 @@ class TelegramBotManager:
             self.terminal_history.clear_session()
             self.logger.info(f"Cleared terminal history for user {user_id}")
         
-        await update.message.reply_text("✅ Conversation history and terminal logs cleared.")
+        await update.message.reply_text("Conversation history and terminal logs cleared.")
     
     @retry_on_network_error(max_retries=10, initial_delay=1.0, backoff_factor=2.0)
     async def restart_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -295,12 +295,12 @@ class TelegramBotManager:
             return
 
         await self._cancel_user_task(user_id)
-        await update.message.reply_text("🔄 Restarting VEXIS-CLI with the same provider, model, and API settings...")
+        await update.message.reply_text("Restarting VEXIS-CLI with the same provider, model, and API settings...")
 
         if self.restart_callback:
             self.restart_callback(user_id)
         else:
-            await update.message.reply_text("⚠️ Restart is not configured for this bot session.")
+            await update.message.reply_text("Restart is not configured for this bot session.")
 
     @retry_on_network_error(max_retries=10, initial_delay=1.0, backoff_factor=2.0)
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -314,14 +314,14 @@ class TelegramBotManager:
             return
         
         await update.message.reply_text(
-            "📖 VEXIS-CLI AI Agent Help\n\n"
-            "Commands:\n"
-            "/start - Start the bot\n"
-            "/reset - Clear conversation history\n"
-            "/restart - Restart while keeping current provider/model/API settings\n"
-            "/help - Show this help message\n\n"
-            "Just send any instruction and I'll execute it on your computer!"
-        )
+                    "VEXIS-CLI AI Agent Help\n\n"
+                    "Commands:\n"
+                    "/start - Start the bot\n"
+                    "/reset - Clear conversation history\n"
+                    "/restart - Restart while keeping current provider/model/API settings\n"
+                    "/help - Show this help message\n\n"
+                    "Just send any instruction and I'll execute it on your computer!"
+                )
     
     async def _cancel_user_task(self, user_id: int):
         """Signal any running task for the specified user to stop."""
@@ -342,8 +342,8 @@ class TelegramBotManager:
             if len(inspect.signature(self.message_callback).parameters) >= 3:
                 return await loop.run_in_executor(None, self.message_callback, user_message, user_id, cancel_event)
             return await loop.run_in_executor(None, self.message_callback, user_message, user_id)
-        return "⚠️ Message callback not set. Bot not properly configured."
-    
+        return "Message callback not set. Bot not properly configured."
+
     @retry_on_network_error(max_retries=10, initial_delay=1.0, backoff_factor=2.0)
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle incoming messages without letting earlier background work block the bot."""
@@ -376,14 +376,14 @@ class TelegramBotManager:
             if running_task and not running_task.task.done():
                 running_task.cancel_event.set()
                 running_task.task.cancel()
-                await update.message.reply_text("🔄 Previous request cancelled. Switching to your latest message...")
+                await update.message.reply_text("Previous request cancelled. Switching to your latest message...")
         
         # Add user message to conversation history
         history = self.get_conversation_history(user_id)
         history.add_message("user", user_message)
         
         # Send processing message
-        processing_msg = await update.message.reply_text("⏳ Processing your request...")
+        processing_msg = await update.message.reply_text("Processing your request...")
         
         # Create and track new task for this user
         cancel_event = threading.Event()
@@ -420,19 +420,19 @@ class TelegramBotManager:
                 # processor. Do not drain the queue here: doing so can keep this
                 # handler alive indefinitely if Telegram is temporarily down.
             else:
-                await processing_msg.edit_text("⚠️ Message callback not set. Bot not properly configured.")
+                await processing_msg.edit_text("Message callback not set. Bot not properly configured.")
                 
         except asyncio.CancelledError:
             self.logger.info(f"Task for user {user_id} cancelled - switching to new task")
             try:
-                await processing_msg.edit_text("🔄 Task cancelled - processing new request...")
+                await processing_msg.edit_text("Task cancelled - processing new request...")
             except Exception as e:
                 self.logger.error(f"Error editing message: {e}")
             raise
         except Exception as e:
             self.logger.error(f"Error processing message: {e}")
             try:
-                await processing_msg.edit_text(f"❌ Error processing your request: {str(e)}")
+                await processing_msg.edit_text(f"Error processing your request: {str(e)}")
             except Exception as e:
                 self.logger.error(f"Error editing message: {e}")
                 pass
@@ -678,7 +678,7 @@ def create_telegram_bot(config_path: Optional[str] = None, terminal_history=None
         TelegramBotManager instance or None if telegram is disabled or not available
     """
     if not TELEGRAM_AVAILABLE:
-        print("⚠️ python-telegram-bot library not installed")
+        print("python-telegram-bot library not installed")
         print("To enable Telegram mode, install it with:")
         print("  pip install python-telegram-bot>=21.0.0")
         return None
@@ -726,7 +726,7 @@ def create_telegram_bot(config_path: Optional[str] = None, terminal_history=None
         
         bot_token = telegram_config.get('bot_token', '')
         if not bot_token:
-            print("⚠️ Telegram bot token not configured")
+            print("Telegram bot token not configured")
             print("Please set bot_token in config.yaml under telegram section")
             return None
         
@@ -740,5 +740,5 @@ def create_telegram_bot(config_path: Optional[str] = None, terminal_history=None
             terminal_history=terminal_history
         )
     except Exception as e:
-        print(f"⚠️ Error loading Telegram configuration: {e}")
+        print(f"Error loading Telegram configuration: {e}")
         return None

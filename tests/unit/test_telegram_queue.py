@@ -55,7 +55,7 @@ def test_handle_message_cancels_overlapping_user_task_and_starts_latest():
 
     assert update.message.reply_text.await_count == 2
     assert "Previous request cancelled" in update.message.reply_text.await_args_list[0].args[0]
-    assert update.message.reply_text.await_args_list[1].args[0] == "⏳ Processing your request..."
+    assert update.message.reply_text.await_args_list[1].args[0] == "Processing your request..."
     assert running_cancel_event.is_set()
     running_task.cancel.assert_called_once()
 
@@ -77,7 +77,7 @@ def test_restart_command_acknowledges_and_invokes_restart_callback():
     asyncio.run(bot.restart_command(update, Mock()))
 
     update.message.reply_text.assert_awaited_once_with(
-        "🔄 Restarting VEXIS-CLI with the same provider, model, and API settings..."
+        "Restarting VEXIS-CLI with the same provider, model, and API settings..."
     )
     assert running_cancel_event.is_set()
     running_task.cancel.assert_called_once()
